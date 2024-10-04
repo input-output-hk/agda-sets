@@ -1,0 +1,27 @@
+name: CI
+on:
+  pull_request:
+  push:
+    paths:
+      - '**.agda'
+      - 'src/*.agda-lib'
+      - '.github/workflows/**.yml'
+    branches: [master]
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: omelkonian/setup-agda@v2
+        with:
+          agda-version: 2.7.0
+          stdlib-version: 2.1.1
+          libraries: |
+            omelkonian/agda-stdlib-classes#5d77a54
+            omelkonian/agda-stdlib-meta#v2.1.1
+          main: abstract-set-theory
+          dir: src
+          deploy: ${{ github.ref == 'refs/heads/master' }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ribbon: true
+          measure-typechecking: true

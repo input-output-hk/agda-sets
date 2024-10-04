@@ -1,0 +1,6 @@
+name: abstract-set-theory
+depend:
+  standard-library
+  standard-library-classes
+  standard-library-meta
+include: src

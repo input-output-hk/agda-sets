@@ -3,7 +3,7 @@
 open import Axiom.Set using (Theory)
 open import Algebra using (CommutativeMonoid)
 
-open import Prelude hiding (ε)
+open import abstract-set-theory.Prelude hiding (ε; CommutativeMonoid)
 
 -- FIXME: this presents a much nicer interface if we use IsCommutativeMonoid' instead
 module Axiom.Set.Sum (th : Theory {lzero}) ⦃ M : CommutativeMonoid 0ℓ 0ℓ ⦄ where

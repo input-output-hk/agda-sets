@@ -4,7 +4,7 @@ open import Axiom.Set using (Theory)
 
 module Axiom.Set.Properties {ℓ} (th : Theory {ℓ}) where
 
-open import Prelude hiding (isEquivalence; trans; map; map₂)
+open import abstract-set-theory.Prelude hiding (isEquivalence; trans; map; map₂)
 open Theory th
 
 import Data.List
@@ -21,7 +21,6 @@ open import Data.List.Relation.Unary.Any using (here; there)
 open import Data.List.Relation.Unary.Unique.Propositional.Properties.WithK using (unique∧set⇒bag)
 open import Data.Product using (map₂; swap)
 open import Data.Product.Properties.Ext
-open import Data.Relation.Nullary.Decidable.Ext using (map′⇔)
 open import Relation.Binary hiding (_⇔_)
 open import Relation.Binary.Lattice
 import Relation.Binary.Lattice.Properties.BoundedJoinSemilattice as Bounded∨Semilattice
@@ -417,12 +416,6 @@ module _ {L : List A} where
     onlyif h (here refl) = from ∈-fromList (h (to ∈-fromList (here refl)))
     onlyif h (there x'∈) = from ∈-fromList (h (to ∈-fromList (there x'∈)))
 
-  module _ {ℓ : Level} {P : Pred (List A) ℓ} where
-    ∃-sublist-⇔ : (∃[ l ] fromList l ⊆ fromList L × P l) ⇔ (∃[ l ] l ⊆ˡ L × P l)
-    ∃-sublist-⇔ = mk⇔ (λ (l , l⊆L , Pl) → l , to sublist-⇔ l⊆L , Pl)
-                      (λ (l , l⊆L , Pl) → l , from sublist-⇔ l⊆L , Pl)
-
-    ∃?-sublist-⇔ : Dec (∃[ l ] fromList l ⊆ fromList L × P l) ⇔ Dec (∃[ l ] l ⊆ˡ L × P l)
-    ∃?-sublist-⇔ = map′⇔ ∃-sublist-⇔
-
-
+  ∃-sublist-⇔ : {P : Pred (List A) ℓ} → (∃[ l ] fromList l ⊆ fromList L × P l) ⇔ (∃[ l ] l ⊆ˡ L × P l)
+  ∃-sublist-⇔ = mk⇔ (λ (l , l⊆L , Pl) → l , to sublist-⇔ l⊆L , Pl)
+                    (λ (l , l⊆L , Pl) → l , from sublist-⇔ l⊆L , Pl)

@@ -1,7 +1,7 @@
 {-# OPTIONS --safe --no-import-sorts #-}
 {-# OPTIONS -v allTactics:100 #-}
 
-open import Prelude
+open import abstract-set-theory.Prelude
 open import Axiom.Set using (Theory)
 
 module Axiom.Set.Map (th : Theory {lzero}) where
@@ -13,12 +13,15 @@ open import Axiom.Set.Properties th
 
 import Data.Sum as ⊎
 open import Data.List.Ext.Properties using (AllPairs⇒≡∨R∨Rᵒᵖ)
-open import Data.Product.Ext using (×-dup)
 open import Data.Product.Properties using (×-≡,≡→≡; ×-≡,≡←≡)
 open import Data.Maybe.Properties using (just-injective)
 open import Relation.Unary using (Decidable)
 import Relation.Binary.PropositionalEquality as I
 import Relation.Binary.Reasoning.Setoid as SetoidReasoning
+
+private
+  ×-dup : ∀ {ℓ} {A : Type ℓ} → A → A × A
+  ×-dup x = x , x
 
 open Equivalence
 
@@ -104,9 +107,9 @@ fromListᵐ l = fromList (deduplicate (λ x y → proj₁ x ≟ proj₁ y) l) ,
            (inj₂ (inj₁ x)) → ⊥-elim (x refl)
            (inj₂ (inj₂ x)) → ⊥-elim (x refl))
   ∘₂ (∈⇒P -⟨ AllPairs⇒≡∨R∨Rᵒᵖ
-           $ deduplicate-! (On.decSetoid (Prelude.decSetoid _≟_) proj₁) l ⟩- ∈⇒P)
+           $ deduplicate-! (On.decSetoid (decSetoid _≟_) proj₁) l ⟩- ∈⇒P)
   where open import Data.List.Relation.Unary.Unique.DecSetoid.Properties
-        open import Relation.Binary.Construct.On as On
+        import Relation.Binary.Construct.On as On
 
 FinMap : Type → Type → Type
 FinMap A B = Σ (Rel A B) (λ R → left-unique R × finite R)

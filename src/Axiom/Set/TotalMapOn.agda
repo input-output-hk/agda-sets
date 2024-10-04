@@ -4,7 +4,7 @@ open import Axiom.Set using (Theory)
 
 module Axiom.Set.TotalMapOn (th : Theory) where
 
-open import Prelude hiding (lookup; map)
+open import abstract-set-theory.Prelude hiding (lookup; map)
 
 open import Axiom.Set.Map th using (left-unique ; Map ; mapWithKey-uniq)
 open import Axiom.Set.Rel th using (Rel ; dom ; dom∈)

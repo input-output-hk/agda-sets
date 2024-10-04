@@ -2,7 +2,7 @@
 
 module Axiom.Set where
 
-open import Prelude hiding (map)
+open import abstract-set-theory.Prelude hiding (map)
 
 import Function.Related.Propositional as R
 open import Data.List.Ext.Properties using (∈-dedup; _×-cong_)

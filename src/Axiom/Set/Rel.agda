@@ -1,7 +1,7 @@
 {-# OPTIONS --safe --no-import-sorts #-}
 {-# OPTIONS -v allTactics:100 #-}
 
-open import Prelude hiding (map)
+open import abstract-set-theory.Prelude hiding (map)
 open import Axiom.Set using (Theory)
 
 module Axiom.Set.Rel (th : Theory {lzero}) where

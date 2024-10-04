@@ -1,6 +1,6 @@
 {-# OPTIONS --safe --no-import-sorts #-}
 
-open import Prelude
+open import abstract-set-theory.Prelude
 open import Axiom.Set
 
 module Axiom.Set.Factor (th : Theory {lzero}) where

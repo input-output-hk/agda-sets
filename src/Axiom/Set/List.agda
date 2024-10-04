@@ -2,7 +2,7 @@
 
 module Axiom.Set.List where
 
-open import Prelude hiding (find)
+open import abstract-set-theory.Prelude hiding (find)
 
 open import Axiom.Set
 

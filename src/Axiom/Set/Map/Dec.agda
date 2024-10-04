@@ -3,7 +3,7 @@ open import Axiom.Set using (Theoryᵈ; Theory)
 
 module Axiom.Set.Map.Dec (thᵈ : Theoryᵈ) where
 
-open import Prelude hiding (map; Monoid)
+open import abstract-set-theory.Prelude hiding (map; Monoid)
 
 open import Algebra using (Monoid)
 import Data.Sum as Sum
@@ -15,8 +15,6 @@ open Theory th
 open import Axiom.Set.Rel th using (dom; dom∈)
 open import Axiom.Set.Map th
 open import Data.Product.Properties using (×-≡,≡→≡; ×-≡,≡←≡)
-
-open import Interface.IsCommutativeMonoid
 
 open Equivalence
 
@@ -51,9 +49,9 @@ module Lookupᵐᵈ (sp-∈ : spec-∈ A) where
        helper _ _ | _ , _ , refl | _ , _ , refl | yes _ | yes _
          with refl ← trans (sym eq) eq' = refl
 
-  module _ {V : Type} ⦃ mon : IsCommutativeMonoid' 0ℓ 0ℓ V ⦄ ⦃ _ : DecEq A ⦄ where
+  module _ {V : Type} ⦃ mon : CommutativeMonoid 0ℓ 0ℓ V ⦄ ⦃ _ : DecEq A ⦄ where
     infixr 6 _∪⁺_
-    open IsCommutativeMonoid' mon
+    open CommutativeMonoid mon
 
     _∪⁺_ : Map A V → Map A V → Map A V
     _∪⁺_ = unionWith (fold id id _◇_)
@@ -67,7 +65,7 @@ module Lookupᵐᵈ (sp-∈ : spec-∈ A) where
 
       dom∪⁺⊆∪dom : dom ((m ∪⁺ m') ˢ) ⊆ dom (m ˢ) ∪ dom (m' ˢ)
       dom∪⁺⊆∪dom {a} a∈ = subst (_∈ dom (m ˢ) ∪ dom (m' ˢ))
-                                  (Prelude.sym $ proj₁ (×-≡,≡←≡ $ proj₁ (proj₂ ∈-dom∪⁺)))
+                                  (sym $ proj₁ (×-≡,≡←≡ $ proj₁ (proj₂ ∈-dom∪⁺)))
                                   (proj₂ $ proj₁ ∈-dom∪⁺)
         where
         ∈-dom∪⁺ : ∃[ c ] (a , proj₁ (from dom∈ a∈)) ≡ ∪dom-lookup c
@@ -77,7 +75,7 @@ module Lookupᵐᵈ (sp-∈ : spec-∈ A) where
       ∪dom⊆dom∪⁺ : dom (m ˢ) ∪ dom (m' ˢ) ⊆ dom ((m ∪⁺ m') ˢ)
       ∪dom⊆dom∪⁺ {a} a∈ with from ∈-map (incl-set-proj₁⊇ a∈)
       ... | c' , a≡c₁' , c'∈ =
-        to dom∈ (proj₂ (∪dom-lookup c') , to ∈-map (c' , ×-≡,≡→≡ (a≡c₁' , Prelude.refl) , c'∈))
+        to dom∈ (proj₂ (∪dom-lookup c') , to ∈-map (c' , ×-≡,≡→≡ (a≡c₁' , refl) , c'∈))
 
       dom∪⁺⇔∪dom : ∀ {a} → a ∈ dom ((m ∪⁺ m')ˢ) ⇔ a ∈ dom (m ˢ) ∪ dom (m' ˢ)
       dom∪⁺⇔∪dom {a} = mk⇔ dom∪⁺⊆∪dom ∪dom⊆dom∪⁺
