@@ -32,6 +32,13 @@ record SpecProperty {ℓ} : Type (sucˡ ℓ) where
         sp-∘ : specProperty P → (f : B → A) → specProperty (P ∘ f)
         sp-¬ : specProperty P → specProperty (¬_ ∘ P)
 
+⊤-SpecProperty : ∀ {a} → SpecProperty {a}
+⊤-SpecProperty = record
+  { specProperty = λ _ → ⊤
+  ; sp-∘         = λ _ _ → _
+  ; sp-¬         = λ _ → _
+  }
+
 Dec-SpecProperty : SpecProperty
 Dec-SpecProperty = record
   { specProperty = Decidable¹
@@ -75,7 +82,7 @@ record Theory {ℓ} : Type (sucˡ ℓ) where
   _∉_ : A → Set A → Type
   _∉_ = ¬_ ∘₂ _∈_
 
-  ≡→∈ : {X : Set A}{a a' : A} → a ∈ X → a ≡ a' → a' ∈ X
+  ≡→∈ : {X : Set A} {a a' : A} → a ∈ X → a ≡ a' → a' ∈ X
   ≡→∈ a∈X refl = a∈X
 
   -- The following is useful in case we have `(a , p)` and `(a , q)`, where `p`

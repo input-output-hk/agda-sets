@@ -6,19 +6,17 @@ open import abstract-set-theory.Prelude hiding (find)
 
 open import Axiom.Set
 
-open import Data.List using (filter)
+open import Data.List as L using (filter)
 import Data.List.Relation.Unary.All as All
 import Data.List.Relation.Unary.Any as Any
-import Function
 import Function.Properties.Inverse as I
 import Function.Related.Propositional as R
 import Relation.Nullary.Decidable as Dec
 open import Data.List.Membership.Propositional using (find; lose) renaming (_∈_ to _∈ˡ_)
 open import Data.List.Membership.Propositional.Properties
-open import Data.Product
+open import Data.Product using (swap)
 open import Data.Product.Algebra
 open import Data.Product.Properties.Ext
-open import Class.DecEq
 open import Relation.Binary using () renaming (Decidable to Dec₂)
 open import Relation.Nullary.Decidable
 
@@ -29,14 +27,14 @@ List-Model = λ where
   .sp            → Dec-SpecProperty
   .specification → λ X P? → filter P? X , mk⇔
     (λ where (Pa , a∈X) → ∈-filter⁺ P? a∈X Pa)
-    (λ a∈f → Data.Product.swap (∈-filter⁻ P? a∈f))
+    (λ a∈f → swap (∈-filter⁻ P? a∈f))
   .unions        → λ X → concat X , mk⇔
     (λ where (T , T∈X , a∈T) → ∈-concat⁺′ a∈T T∈X)
     (λ a∈cX → case ∈-concat⁻′ _ a∈cX of λ where (T , a∈T , T∈X) → (T , T∈X , a∈T))
-  .replacement   → λ f X → Data.List.map f X , λ {b} →
+  .replacement   → λ f X → L.map f X , λ {b} →
     (∃[ a ] b ≡ f a × a ∈ˡ X) ∼⟨ ∃-cong′ (I.↔⇒⇔ (×-comm _ _)) ⟩
     (∃[ a ] a ∈ˡ X × b ≡ f a) ⤖⟨ I.↔⇒⤖ (map-∈↔ f) ⟩
-    b ∈ˡ Data.List.map f X    ∎
+    b ∈ˡ L.map f X    ∎
   .listing → λ l → l , mk⇔ id id
     where open Theory hiding (filter)
           open R.EquationalReasoning
