@@ -7,9 +7,11 @@ module Axiom.Set.Properties {ℓ} (th : Theory {ℓ}) where
 open import abstract-set-theory.Prelude hiding (isEquivalence; trans; map; map₂)
 open Theory th
 
-import Data.List
-import Data.Sum
+import Data.List as L
+import Data.Sum as ⊎
 import Function.Related.Propositional as R
+import Relation.Binary.Lattice.Properties.BoundedJoinSemilattice as Bounded∨Semilattice
+import Relation.Binary.Lattice.Properties.JoinSemilattice as ∨Semilattice
 import Relation.Nullary.Decidable
 open import Data.List.Ext.Properties using (_×-cong_; _⊎-cong_)
 open import Data.List.Membership.DecPropositional using () renaming (_∈?_ to _∈ˡ?_)
@@ -23,8 +25,6 @@ open import Data.Product using (map₂; swap)
 open import Data.Product.Properties.Ext
 open import Relation.Binary hiding (_⇔_)
 open import Relation.Binary.Lattice
-import Relation.Binary.Lattice.Properties.BoundedJoinSemilattice as Bounded∨Semilattice
-import Relation.Binary.Lattice.Properties.JoinSemilattice as ∨Semilattice
 open import Relation.Binary.Morphism using (IsOrderHomomorphism)
 
 open Equivalence
@@ -255,12 +255,12 @@ singleton-finite {a = a} = [ a ] , λ {x} →
 
 filter-finite : ∀ {P : A → Type}
               → (sp : specProperty P) → Decidable¹ P → finite X → finite (filter sp X)
-filter-finite {X = X} {P} sp P? (l , hl) = Data.List.filter P? l , λ {a} →
+filter-finite {X = X} {P} sp P? (l , hl) = L.filter P? l , λ {a} →
   a ∈ filter sp X            ∼⟨ R.SK-sym ∈-filter ⟩
   (P a × a ∈ X)              ∼⟨ R.K-refl ×-cong hl ⟩
   (P a × a ∈ˡ l)             ∼⟨ mk⇔ (uncurry $ flip $ ∈-filter⁺ P?)
                                     (swap ∘ ∈-filter⁻ P?) ⟩
-  a ∈ˡ Data.List.filter P? l ∎
+  a ∈ˡ L.filter P? l ∎
   where open R.EquationalReasoning
 
 ∪-⊆ˡ : X ⊆ X ∪ Y
@@ -281,7 +281,7 @@ filter-finite {X = X} {P} sp P? (l , hl) = Data.List.filter P? l , λ {a} →
 ∪-Supremum _ _ = ∪-⊆ˡ , ∪-⊆ʳ , λ _ → ∪-⊆
 
 ∪-cong-⊆ : _∪_ {A} Preserves₂ _⊆_ ⟶ _⊆_ ⟶ _⊆_
-∪-cong-⊆ X⊆X' Y⊆Y' = ∈⇔P ∘′ (Data.Sum.map X⊆X' Y⊆Y') ∘′ ∈⇔P
+∪-cong-⊆ X⊆X' Y⊆Y' = ∈⇔P ∘′ (⊎.map X⊆X' Y⊆Y') ∘′ ∈⇔P
 
 ∪-cong : _∪_ {A} Preserves₂ _≡ᵉ_ ⟶ _≡ᵉ_ ⟶ _≡ᵉ_
 ∪-cong = cong-⊆⇒cong₂ ∪-cong-⊆
@@ -290,7 +290,7 @@ filter-finite {X = X} {P} sp P? (l , hl) = Data.List.filter P? l , λ {a} →
 ∪-preserves-finite {a = X} {Y} (l , hX) (l' , hY) = (l ++ l') , λ {a} →
   a ∈ X ∪ Y          ∼⟨ R.SK-sym ∈-∪ ⟩
   (a ∈ X ⊎ a ∈ Y)    ∼⟨ hX ⊎-cong hY ⟩
-  (a ∈ˡ l ⊎ a ∈ˡ l') ∼⟨ mk⇔ Data.Sum.[ ∈-++⁺ˡ , ∈-++⁺ʳ _ ] (∈-++⁻ _) ⟩
+  (a ∈ˡ l ⊎ a ∈ˡ l') ∼⟨ mk⇔ ⊎.[ ∈-++⁺ˡ , ∈-++⁺ʳ _ ] (∈-++⁻ _) ⟩
   a ∈ˡ l ++ l'       ∎
   where open R.EquationalReasoning
 

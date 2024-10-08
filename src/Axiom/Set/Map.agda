@@ -4,7 +4,7 @@
 open import abstract-set-theory.Prelude
 open import Axiom.Set using (Theory)
 
-module Axiom.Set.Map (th : Theory {lzero}) where
+module Axiom.Set.Map (th : Theory) where
 
 open Theory th renaming (map to mapˢ)
 
@@ -16,16 +16,7 @@ open import Data.List.Ext.Properties using (AllPairs⇒≡∨R∨Rᵒᵖ)
 open import Data.Product.Properties using (×-≡,≡→≡; ×-≡,≡←≡)
 open import Data.Maybe.Properties using (just-injective)
 open import Relation.Unary using (Decidable)
-import Relation.Binary.PropositionalEquality as I
 import Relation.Binary.Reasoning.Setoid as SetoidReasoning
-
-private
-  ×-dup : ∀ {ℓ} {A : Type ℓ} → A → A × A
-  ×-dup x = x , x
-
-open Equivalence
-
-open import Class.DecEq using (DecEq; _≟_)
 
 open import Reflection.Tactic using (initTac)
 open import Tactic.AnyOf
@@ -33,25 +24,31 @@ open import Tactic.Assumption
 open import Tactic.Defaults
 open import Tactic.ByEq
 
+open Equivalence
+
 -- Because of missing macro hygiene, we have to copy&paste this.
 -- c.f. https://github.com/agda/agda/issues/3819
-private macro
-  ∈⇒P = anyOfⁿᵗ
-    (quote ∈-filter⁻' ∷ quote ∈-∪⁻ ∷ quote ∈-map⁻' ∷ quote ∈-fromList⁻ ∷ [])
-  P⇒∈ = anyOfⁿᵗ
-    (quote ∈-filter⁺' ∷ quote ∈-∪⁺ ∷ quote ∈-map⁺' ∷ quote ∈-fromList⁺ ∷ [])
-  ∈⇔P = anyOfⁿᵗ
-    ( quote ∈-filter⁻' ∷ quote ∈-∪⁻ ∷ quote ∈-map⁻' ∷ quote ∈-fromList⁻
-    ∷ quote ∈-filter⁺' ∷ quote ∈-∪⁺ ∷ quote ∈-map⁺' ∷ quote ∈-fromList⁺ ∷ [])
+private
+  macro
+    ∈⇒P = anyOfⁿᵗ
+      (quote ∈-filter⁻' ∷ quote ∈-∪⁻ ∷ quote ∈-map⁻' ∷ quote ∈-fromList⁻ ∷ [])
+    P⇒∈ = anyOfⁿᵗ
+      (quote ∈-filter⁺' ∷ quote ∈-∪⁺ ∷ quote ∈-map⁺' ∷ quote ∈-fromList⁺ ∷ [])
+    ∈⇔P = anyOfⁿᵗ
+      ( quote ∈-filter⁻' ∷ quote ∈-∪⁻ ∷ quote ∈-map⁻' ∷ quote ∈-fromList⁻
+      ∷ quote ∈-filter⁺' ∷ quote ∈-∪⁺ ∷ quote ∈-map⁺' ∷ quote ∈-fromList⁺ ∷ [])
 
-private variable
-  A A' B B' C D : Type
-  R R' : Rel A B
-  X Y : Set A
-  a : A
-  a' : A'
-  b : B
-  b' : B'
+  variable
+    A A' B B' C D : Type
+    R R' : Rel A B
+    X Y : Set A
+    a : A
+    a' : A'
+    b : B
+    b' : B'
+
+  ×-dup : ∀ {ℓ} {A : Type ℓ} → A → A × A
+  ×-dup x = x , x
 
 left-unique : Rel A B → Type
 left-unique R = ∀ {a b b'} → (a , b) ∈ R → (a , b') ∈ R → b ≡ b'

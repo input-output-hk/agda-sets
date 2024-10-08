@@ -5,10 +5,8 @@ module Axiom.Set.Map.Dec (thᵈ : Theoryᵈ) where
 
 open import abstract-set-theory.Prelude hiding (map; Monoid)
 
-open import Algebra using (Monoid)
 import Data.Sum as Sum
 open import Data.These hiding (map)
-open import Class.DecEq using (DecEq)
 
 open Theoryᵈ thᵈ using (_∈?_; th; incl-set'; incl-set; incl-set-proj₁⊇)
 open Theory th

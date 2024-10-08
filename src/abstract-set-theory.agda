@@ -7,6 +7,7 @@ open import Axiom.Set.Map
 open import Axiom.Set.Map.Dec
 open import Axiom.Set.Sum
 open import Axiom.Set.List
+open import Axiom.Set.Predicates
 open import Axiom.Set.Factor
 open import Axiom.Set.TotalMap
 open import Axiom.Set.TotalMapOn

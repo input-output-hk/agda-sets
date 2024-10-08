@@ -3,21 +3,19 @@
 open import abstract-set-theory.Prelude
 open import Axiom.Set
 
-module Axiom.Set.Factor (th : Theory {lzero}) where
+module Axiom.Set.Factor (th : Theory) where
 
 open Theory th
 open import Axiom.Set.Properties th
 
 import Function.Related.Propositional as R
 open import Data.List.Ext.Properties
-open import Data.List.Membership.Propositional using () renaming (_∈_ to _∈ˡ_)
 open import Data.List.Relation.Binary.BagAndSetEquality
 open import Data.List.Relation.Binary.Disjoint.Propositional
 open import Data.List.Relation.Binary.Permutation.Propositional
 open import Data.List.Relation.Unary.Unique.DecPropositional.Properties
 open import Data.List.Relation.Unary.Unique.Propositional
 open import Data.List.Relation.Unary.Unique.Propositional.Properties.WithK
-open import Class.DecEq
 open import Relation.Binary
 
 open Equivalence

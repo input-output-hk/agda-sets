@@ -4,7 +4,7 @@
 open import abstract-set-theory.Prelude hiding (map)
 open import Axiom.Set using (Theory)
 
-module Axiom.Set.Rel (th : Theory {lzero}) where
+module Axiom.Set.Rel (th : Theory) where
 
 import Relation.Binary.Reasoning.Setoid as SetoidReasoning
 import Function.Related.Propositional as R
@@ -12,21 +12,18 @@ import Function.Related.Propositional as R
 open Theory th
 open import Axiom.Set.Properties th
 
-import Data.Product
+import Data.Product as ×
 open import Data.List.Ext.Properties using (_⊎-cong_)
-open import Data.These hiding (map)
 open import Data.Maybe.Base using () renaming (map to map?)
 open import Data.Product.Properties using (,-injectiveˡ; ×-≡,≡→≡)
 open import Data.Product.Properties.Ext using (∃-cong′; ∃-distrib-⊎)
 open import Relation.Unary using (Decidable)
-open import Relation.Nullary using (yes; no)
 open import Relation.Binary using (_Preserves_⟶_)
-import Relation.Binary.PropositionalEquality as I
-
-open Equivalence
 
 open import Tactic.AnyOf
 open import Tactic.Defaults
+
+open Equivalence
 
 -- Because of missing macro hygiene, we have to copy&paste this.
 -- c.f. https://github.com/agda/agda/issues/3819
@@ -69,17 +66,17 @@ m ∣^' P? = filter (sp-∘ P? proj₂) m
 
 impl⇒res⊆ : ∀ {X : Rel A B} {P P'} (sp-P : specProperty P) (sp-P' : specProperty P')
           → (∀ {a} → P a → P' a) → X ∣' sp-P ⊆ X ∣' sp-P'
-impl⇒res⊆ sp-P sp-P' P⇒P' a∈X∣'P = ∈⇔P (Data.Product.map₁ P⇒P' (∈⇔P a∈X∣'P))
+impl⇒res⊆ sp-P sp-P' P⇒P' a∈X∣'P = ∈⇔P (×.map₁ P⇒P' (∈⇔P a∈X∣'P))
 
 impl⇒cores⊆ : ∀ {X : Rel A B} {P P'} (sp-P : specProperty P) (sp-P' : specProperty P')
             → (∀ {b} → P b → P' b) → X ∣^' sp-P ⊆ X ∣^' sp-P'
-impl⇒cores⊆ sp-P sp-P' P⇒P' a∈X∣^'P = ∈⇔P (Data.Product.map₁ P⇒P' (∈⇔P a∈X∣^'P))
+impl⇒cores⊆ sp-P sp-P' P⇒P' a∈X∣^'P = ∈⇔P (×.map₁ P⇒P' (∈⇔P a∈X∣^'P))
 
 mapˡ : (A → A') → Rel A B → Rel A' B
-mapˡ f R = map (Data.Product.map₁ f) R
+mapˡ f R = map (×.map₁ f) R
 
 mapʳ : (B → B') → Rel A B → Rel A B'
-mapʳ f R = map (Data.Product.map₂ f) R
+mapʳ f R = map (×.map₂ f) R
 
 dom∈ : ∀ {a} → (∃[ b ] (a , b) ∈ R) ⇔ a ∈ dom R
 dom∈ {R = R} {a} =
@@ -181,8 +178,8 @@ module Restriction (sp-∈ : spec-∈ A) where
   m ⟪$⟫ X = range (m ∣ X)
 
   res-cong : (R ∣_) Preserves _≡ᵉ_ ⟶ _≡ᵉ_
-  res-cong (X⊆Y , Y⊆X) = (λ ∈R∣X → ∈⇔P (Data.Product.map₁ X⊆Y (∈⇔P ∈R∣X)))
-                       , (λ ∈R∣Y → ∈⇔P (Data.Product.map₁ Y⊆X (∈⇔P ∈R∣Y)))
+  res-cong (X⊆Y , Y⊆X) = (λ ∈R∣X → ∈⇔P (×.map₁ X⊆Y (∈⇔P ∈R∣X)))
+                       , (λ ∈R∣Y → ∈⇔P (×.map₁ Y⊆X (∈⇔P ∈R∣Y)))
 
   res-dom : dom (R ∣ X) ⊆ X
   res-dom a∈dom with ∈⇔P a∈dom
@@ -193,8 +190,8 @@ module Restriction (sp-∈ : spec-∈ A) where
   ... | _ , refl , h = ∈-map⁺'' $ proj₂ (∈⇔P h)
 
   res-comp-cong : (R ∣_ᶜ) Preserves _≡ᵉ_ ⟶ _≡ᵉ_
-  res-comp-cong (X⊆Y , Y⊆X) = (λ ∈R∣X → ∈⇔P (Data.Product.map₁ (_∘ Y⊆X) (∈⇔P ∈R∣X)))
-                            , (λ ∈R∣Y → ∈⇔P (Data.Product.map₁ (_∘ X⊆Y) (∈⇔P ∈R∣Y)))
+  res-comp-cong (X⊆Y , Y⊆X) = (λ ∈R∣X → ∈⇔P (×.map₁ (_∘ Y⊆X) (∈⇔P ∈R∣X)))
+                            , (λ ∈R∣Y → ∈⇔P (×.map₁ (_∘ X⊆Y) (∈⇔P ∈R∣Y)))
 
   res-comp-dom : ∀ {a} → a ∈ dom (R ∣ X ᶜ) → a ∉ X
   res-comp-dom a∈dom with ∈⇔P a∈dom
