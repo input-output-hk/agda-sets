@@ -13,6 +13,7 @@ open import Axiom.Set.Properties th
 
 import Data.Sum as ⊎
 open import Data.List.Ext.Properties using (AllPairs⇒≡∨R∨Rᵒᵖ)
+open import Data.Product using (swap)
 open import Data.Product.Properties using (×-≡,≡→≡; ×-≡,≡←≡)
 open import Data.Maybe.Properties using (just-injective)
 open import Relation.Unary using (Decidable)
@@ -70,6 +71,8 @@ left-unique-mapˢ _ p q with from ∈-map p | from ∈-map q
 Map : Type → Type → Type
 Map A B = Σ (Rel A B) left-unique
 
+infix 4 _≡ᵐ_
+
 _≡ᵐ_ : Map A B → Map A B → Type
 (x , _) ≡ᵐ (y , _) = x ≡ᵉ y
 
@@ -80,11 +83,6 @@ _ˢ = proj₁
 
 _ᵐ : (R : Rel A B) → ⦃ IsLeftUnique R ⦄ → Map A B
 _ᵐ R ⦃ record { isLeftUnique = h } ⦄ = R , h
-
-infix 4 _≡ᵉᵐ_
-
-_≡ᵉᵐ_ : Map A B → Map A B → Type
-_≡ᵉᵐ_ = _≡ᵉ_ on _ˢ
 
 ⊆-map : (f : Rel A B → Rel A B) → (∀ {R} → f R ⊆ R) → Map A B → Map A B
 ⊆-map f H m = f (m ˢ) , ⊆-left-unique H (proj₂ m)
@@ -207,6 +205,14 @@ module Unionᵐ (sp-∈ : spec-∈ A) where
     (∈-∪⁺ ∘′ ⊎.map₂ (proj₂ ∘′ ∈⇔P) ∘′ ∈⇔P)
     (∈⇔P ∘′ ⊎.map₂ (to ∈-filter ∘′ (λ h → (flip disj (∈-map⁺'' h)) , h)) ∘ ∈⇔P)
 
+  singleton-∈-∪ˡ : a ∈ dom (m ˢ) → m ∪ˡ ❴ (a , b) ❵ᵐ ≡ᵐ m
+  singleton-∈-∪ˡ {m = m} a∈domm .proj₁ x with (from ∈-∪ x)
+  ... | inj₁ h = h
+  ... | inj₂ h = case from ∈-filter h of λ where
+    (h₁ , h₂) → ⊥-elim $ h₁ $ subst (λ u → proj₁ u ∈ mapˢ proj₁ (proj₁ m))
+                                    (sym (from ∈-singleton h₂)) a∈domm
+  singleton-∈-∪ˡ _ .proj₂ = ∪-⊆ˡ
+
   insert : Map A B → A → B → Map A B
   insert m a b = ❴ a , b ❵ᵐ ∪ˡ m
 
@@ -267,6 +273,12 @@ constMap X b = mapˢ (_, b) X , λ x x₁ →
   trans (proj₂ $ ×-≡,≡←≡ $ proj₁ $ proj₂ (∈⇔P x))
         (sym $ proj₂ $ ×-≡,≡←≡ $ proj₁ $ proj₂ (∈⇔P x₁))
 
+constMap-dom : dom (constMap X b ˢ) ≡ᵉ X
+constMap-dom .proj₁ a∈dom with from dom∈ a∈dom
+... | b' , ab'∈map with from ∈-map ab'∈map
+... | a' , ab'≡a'b , a'∈X = subst (_∈ _) (sym (proj₁ (×-≡,≡←≡ ab'≡a'b))) a'∈X
+constMap-dom .proj₂ a∈X = to dom∈ (_ , to ∈-map (_ , refl , a∈X))
+
 mapPartialLiftKey-just-uniq : ∀ {f : A → B → Maybe B'}
   → left-unique R
   → just (a , b)  ∈ mapˢ (mapPartialLiftKey f) R
@@ -316,7 +328,15 @@ module Restrictionᵐ (sp-∈ : spec-∈ A) where
   curryᵐ : Map (A × B) C → A → Map B C
   curryᵐ m a = R.curryʳ (m ˢ) a , λ h h' → proj₂ m (R.∈-curryʳ h) (R.∈-curryʳ h')
 
-  res-singleton : ∀ {k} → k ∈ dom (m ˢ) → ∃[ v ] m ∣ ❴ k ❵ ≡ᵉᵐ ❴ k , v ❵ᵐ
+  res-dom∈ : {R : Rel A B} → (a , b) ∈ (m ∣ dom R) ˢ ⇔ ((a , b) ∈ m ˢ × a ∈ dom R)
+  res-dom∈ = mk⇔ (λ ab∈ → (R.res-⊆ ab∈ , R.res-dom (to dom∈ (_ , ab∈)))) (to ∈-filter ∘ swap)
+
+  res-subset : R ⊆ m ˢ → (m ∣ dom R) ˢ ≡ᵉ R
+  res-subset {m = _ , uniq} R⊆m .proj₁ {a , b} ab∈ with from dom∈ (R.res-dom $ to dom∈ (b , ab∈))
+  ... | b' , ab'∈ = subst (λ u → (a , u) ∈ _) (uniq (R⊆m ab'∈) $ R.res-⊆ ab∈) ab'∈
+  res-subset {m = m} R⊆m .proj₂ ab∈ = from (res-dom∈ {m = m}) (R⊆m ab∈ , to dom∈ (_ , ab∈))
+
+  res-singleton : ∀ {k} → k ∈ dom (m ˢ) → ∃[ v ] m ∣ ❴ k ❵ ≡ᵐ ❴ k , v ❵ᵐ
   res-singleton {m = m@(_ , uniq)} k∈domm
     with (k , v) , (refl , h) ← ∈⇔P k∈domm
     = v
@@ -327,7 +347,7 @@ module Restrictionᵐ (sp-∈ : spec-∈ A) where
                         (sym $ from ∈-singleton a∈❴k,v❵)
                         (∈⇔P (to ∈-singleton refl , h))
 
-  res-singleton' : ∀ {k v} → (k , v) ∈ m ˢ → m ∣ ❴ k ❵ ≡ᵉᵐ ❴ k , v ❵ᵐ
+  res-singleton' : ∀ {k v} → (k , v) ∈ m ˢ → m ∣ ❴ k ❵ ≡ᵐ ❴ k , v ❵ᵐ
   res-singleton' {m = m} kv∈m
     with _ , h ← res-singleton {m = m} (∈⇔P (-, (refl , kv∈m)))
     = subst _ (sym $ proj₂ m kv∈m (R.res-⊆ $ proj₂ h $ to ∈-singleton refl)) h
