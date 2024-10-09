@@ -1,5 +1,5 @@
-TOTAL: 0m26s
-src/abstract-set-theory/Prelude: 0m9s
+TOTAL: 0m25s
+src/abstract-set-theory/Prelude: 0m8s
 src/Data/List/Relation/Unary/Unique/Propositional/Properties/WithK: 0m2s
 src/Data/List/Ext/Properties: 0m0s
 src/Data/Product/Properties/Ext: 0m1s
@@ -12,6 +12,6 @@ src/Axiom/Set/Factor: 0m1s
 src/Axiom/Set/Sum: 0m1s
 src/Axiom/Set/List: 0m0s
 src/Axiom/Set/Predicates: 0m0s
-src/Axiom/Set/TotalMap: 0m1s
-src/Axiom/Set/TotalMapOn: 0m0s
+src/Axiom/Set/TotalMap: 0m0s
+src/Axiom/Set/TotalMapOn: 0m1s
 src/abstract-set-theory: 0m0s
