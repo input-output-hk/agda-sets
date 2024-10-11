@@ -8,6 +8,8 @@ open import abstract-set-theory.Prelude hiding (isEquivalence; trans; map; map�
 open Theory th
 
 import Data.List as L
+import Data.List.Relation.Unary.All as All
+import Data.List.Relation.Unary.AllPairs as AllPairs
 import Data.Sum as ⊎
 import Function.Related.Propositional as R
 import Relation.Binary.Lattice.Properties.BoundedJoinSemilattice as Bounded∨Semilattice
@@ -196,6 +198,12 @@ mapPartial-∅ : {f : A → Maybe B} → mapPartial f ∅ ≡ᵉ ∅
 mapPartial-∅ {f = f} = ∅-least λ x∈map → case from (∈-mapPartial {f = f}) x∈map of λ where
   (_ , h , _) → ⊥-elim (∉-∅ h)
 
+singleton-strongly-finite : {a : A} → strongly-finite (singleton a)
+singleton-strongly-finite = _ , All.[] AllPairs.∷ AllPairs.[] , R.SK-sym ∈-fromList
+
+card-singleton : {a : A} → card (singleton a , singleton-strongly-finite) ≡ 1
+card-singleton = refl
+
 card-≡ᵉ : (X Y : Σ (Set A) strongly-finite) → proj₁ X ≡ᵉ proj₁ Y → card X ≡ card Y
 card-≡ᵉ (X , lX , lXᵘ , eqX) (Y , lY , lYᵘ , eqY) X≡Y =
   ↭-length $ ∼bag⇒↭ $ unique∧set⇒bag lXᵘ lYᵘ λ {a} →
@@ -204,6 +212,14 @@ card-≡ᵉ (X , lX , lXᵘ , eqX) (Y , lY , lYᵘ , eqY) X≡Y =
     a ∈ Y    ∼⟨ eqY ⟩
     a ∈ˡ lY  ∎
   where open R.EquationalReasoning
+
+singleton-≢-∅ : {a : A} → singleton a ≢ ∅
+singleton-≢-∅ {A = A} {a = a} X≡∅ =
+  case card-≡ᵉ (singleton a , singleton-strongly-finite)
+               (∅ , ∅-strongly-finite)
+               (subst (singleton a ≡ᵉ_) X≡∅  ≡ᵉ-refl)
+    of λ ()
+  where open IsEquivalence (≡ᵉ-isEquivalence {A}) renaming (refl to ≡ᵉ-refl)
 
 module _ {P : A → Type} {sp-P : specProperty P} where
 

@@ -11,3 +11,5 @@ open import Axiom.Set.Predicates
 open import Axiom.Set.Factor
 open import Axiom.Set.TotalMap
 open import Axiom.Set.TotalMapOn
+
+open import abstract-set-theory.FiniteSetTheory
