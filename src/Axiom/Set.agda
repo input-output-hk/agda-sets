@@ -298,6 +298,9 @@ record Theoryᶠ : Type₁ where
   DecEq⇒strongly-finite : ⦃ DecEq A ⦄ → (X : Set A) → strongly-finite X
   DecEq⇒strongly-finite X = DecEq∧finite⇒strongly-finite X (finiteness X)
 
+  toList : ⦃ DecEq A ⦄ → Set A → List A
+  toList = proj₁ ∘ DecEq⇒strongly-finite
+
   lengthˢ : ⦃ DecEq A ⦄ → Set A → ℕ
   lengthˢ X = card (X , DecEq⇒strongly-finite X)
 
