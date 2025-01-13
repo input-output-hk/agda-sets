@@ -380,13 +380,23 @@ module Lookupᵐ (sp-∈ : spec-∈ A) where
   open Unionᵐ sp-∈
   open Restriction sp-∈
 
-  module _ (m : Map A B) (x : A) where
+  module _ (m@(mˢ , uniq) : Map A B) (x : A) where
     lookupᵐ : {@(tactic initTac assumption') _ : x ∈ dom (m ˢ)} → B
     lookupᵐ {h} = proj₁ (from dom∈ h)
+
+    lookupᵐ-∈ : (_ : x ∈ dom (m ˢ)) → (x , lookupᵐ) ∈ m ˢ
+    lookupᵐ-∈ h = proj₂ (from dom∈ h)
+
+    ∈-lookup : ∀ {y} → (x∈m : x ∈ dom (m ˢ)) → (P : (x , y) ∈ m ˢ) → lookupᵐ {x∈m} ≡ y
+    ∈-lookup x∈m xy∈m = uniq (lookupᵐ-∈ x∈m) xy∈m
 
     lookupᵐ? : ⦃ (x ∈ dom (m ˢ)) ⁇ ⦄ → Maybe B
     lookupᵐ? ⦃ ⁇ no  _ ⦄ = nothing
     lookupᵐ? ⦃ ⁇ yes _ ⦄ = just lookupᵐ
+
+    ∈⇒lookup≡just : ∀ {y} → (P : (x , y) ∈ m ˢ) → ⦃ _ : (x ∈ dom (m ˢ)) ⁇ ⦄ → lookupᵐ? ≡ just y
+    ∈⇒lookup≡just P ⦃ ⁇ (yes q') ⦄ = cong just (∈-lookup q' P)
+    ∈⇒lookup≡just P ⦃ ⁇ (no ¬q') ⦄ = ⊥-elim (¬q' (to dom∈ (_ , P)))
 
   pullbackMap : (m : Map A B) → ⦃ ∀ {x} → (x ∈ dom (m ˢ)) ⁇ ⦄ → (A' → A) → Set A' → Map A' B
   pullbackMap m f s = mapMaybeWithKeyᵐ (λ a _ → lookupᵐ? m (f a)) (idMap s)
