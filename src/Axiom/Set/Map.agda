@@ -328,7 +328,7 @@ module Restrictionᵐ (sp-∈ : spec-∈ A) where
   curryᵐ : Map (A × B) C → A → Map B C
   curryᵐ m a = R.curryʳ (m ˢ) a , λ h h' → proj₂ m (R.∈-curryʳ h) (R.∈-curryʳ h')
 
-  res-dom∈ : {R : Rel A B} → (a , b) ∈ (m ∣ dom R) ˢ ⇔ ((a , b) ∈ m ˢ × a ∈ dom R)
+  res-dom∈ : ∀ {b} → (a , b) ∈ (m ∣ X) ˢ ⇔ ((a , b) ∈ m ˢ × a ∈ X)
   res-dom∈ = mk⇔ (λ ab∈ → (R.res-⊆ ab∈ , R.res-dom (to dom∈ (_ , ab∈)))) (to ∈-filter ∘ swap)
 
   res-subset : R ⊆ m ˢ → (m ∣ dom R) ˢ ≡ᵉ R
