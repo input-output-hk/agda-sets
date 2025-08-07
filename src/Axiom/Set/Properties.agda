@@ -235,8 +235,8 @@ module _ {P : A → Type} {sp-P : specProperty P} where
   filter-pres-⊆ xy a∈ = let Pa∈ = from ∈-filter a∈ in
     to ∈-filter (map₂ xy Pa∈)
 
-  filter-pres-≡ᵉ : X ≡ᵉ Y → filter sp-P X ≡ᵉ filter sp-P Y
-  filter-pres-≡ᵉ (X⊆Y , Y⊆X) = filter-pres-⊆ X⊆Y , filter-pres-⊆ Y⊆X
+  filter-cong : X ≡ᵉ Y → filter sp-P X ≡ᵉ filter sp-P Y
+  filter-cong (X⊆Y , Y⊆X) = filter-pres-⊆ X⊆Y , filter-pres-⊆ Y⊆X
 
   filter-split-∪ : ∀ {a} → a ∈ filter sp-P (X ∪ Y) → (P a × a ∈ X) ⊎ (P a × a ∈ Y)
   filter-split-∪ a∈ = case (proj₁ (from ∈-filter a∈) , from ∈-∪ (proj₂ (from ∈-filter a∈))) of
