@@ -47,6 +47,13 @@ module Lookupᵐᵈ (sp-∈ : spec-∈ A) where
        helper _ _ | _ , _ , refl | _ , _ , refl | yes _ | yes _
          with refl ← trans (sym eq) eq' = refl
 
+  intersectWith
+    : (B → C → D)
+    → (m : Map A B) ⦃ _ : ∀ {x} → (x ∈ dom (m ˢ)) ⁇ ⦄
+    → Map A C
+    → Map A D
+  intersectWith f m = mapMaybeWithKeyᵐ (λ a c → flip f c <$> lookupᵐ? m a)
+
   module _ {V : Type} ⦃ mon : CommutativeMonoid 0ℓ 0ℓ V ⦄ ⦃ _ : DecEq A ⦄ where
     infixr 6 _∪⁺_
     open CommutativeMonoid mon
