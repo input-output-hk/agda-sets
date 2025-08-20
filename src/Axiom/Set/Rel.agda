@@ -220,6 +220,11 @@ module Restriction (sp-∈ : spec-∈ A) where
   res-∅ᶜ : R ∣ ∅ ᶜ ≡ᵉ R
   res-∅ᶜ = ex-⊆ , λ a∈R → ∈⇔P (∉-∅ , a∈R)
 
+  ∈-res : ∀ {a} {b : B} → (a , b) ∈ (R ∣ X) ⇔ ((a , b) ∈ R × a ∈ X)
+  ∈-res =
+    mk⇔ (λ ab∈ → (res-⊆ ab∈ , res-dom (to dom∈ (_ , ab∈))))
+        (to ∈-filter ∘ ×.swap)
+
   ∈-resᶜ-dom⁻ : ∀ {a} → a ∈ dom (R ∣ X ᶜ) → a ∉ X × ∃[ b ] (a , b) ∈ R
   ∈-resᶜ-dom⁻ a∈ = res-comp-dom a∈ , from dom∈ (dom⊆ ex-⊆ a∈)
 
