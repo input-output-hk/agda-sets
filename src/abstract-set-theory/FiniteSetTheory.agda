@@ -101,6 +101,13 @@ X ᶠˢ = X , finiteness _
 filterˢ : (P : A → Type) ⦃ _ : P ⁇¹ ⦄ → ℙ A → ℙ A
 filterˢ P = filterˢ? (to-sp P)
 
+-- [ R ∘ʳ S ] = { (a , c) | ∃ b → (a , b) ∈ R × (b , c) ∈ S }
+_∘ʳ_ : {A B C : Type} ⦃ _ : DecEq B ⦄ → Rel A B → Rel B C → Rel A C
+R ∘ʳ S =
+  concatMapˢ
+    (λ (a , b) → mapˢ ((a ,_) ∘ proj₂) $ filterˢ ((b ≡_) ∘ proj₁) S)
+    R
+
 filterᵐ : (P : A × B → Type) ⦃ _ : P ⁇¹ ⦄ → (A ⇀ B) → (A ⇀ B)
 filterᵐ P = filterᵐ? (to-sp P)
 
