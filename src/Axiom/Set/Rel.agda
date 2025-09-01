@@ -55,6 +55,10 @@ dom = map proj₁
 range : Rel A B → Set B
 range = map proj₂
 
+_⁻¹ʳ : {A B : Type} → Rel A B → Rel B A
+R ⁻¹ʳ = map swap R
+  where open import Data.Product using (swap)
+
 disjoint-dom⇒disjoint : disjoint (dom R) (dom R') → disjoint R R'
 disjoint-dom⇒disjoint disj = ∈-map⁺'' -⟨ disj ⟩- ∈-map⁺''
 
