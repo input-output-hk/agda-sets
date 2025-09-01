@@ -1,8 +1,8 @@
-TOTAL: 3m23s
-src/abstract-set-theory/Prelude: 2m21s
-src/Data/List/Relation/Unary/Unique/Propositional/Properties/WithK: 0m37s
-src/Data/List/Ext/Properties: 0m1s
-src/Data/Product/Properties/Ext: 0m1s
+TOTAL: 3m21s
+src/abstract-set-theory/Prelude: 2m20s
+src/Data/List/Relation/Unary/Unique/Propositional/Properties/WithK: 0m36s
+src/Data/List/Ext/Properties: 0m2s
+src/Data/Product/Properties/Ext: 0m0s
 src/Axiom/Set: 0m1s
 src/Axiom/Set/Properties: 0m9s
 src/Axiom/Set/Rel: 0m2s
@@ -16,6 +16,6 @@ src/Axiom/Set/TotalMap: 0m0s
 src/Axiom/Set/TotalMapOn: 0m0s
 src/Class/IsSet: 0m0s
 src/Class/HasEmptySet: 0m0s
-src/Class/HasSingleton: 0m1s
-src/abstract-set-theory/FiniteSetTheory: 0m0s
+src/Class/HasSingleton: 0m0s
+src/abstract-set-theory/FiniteSetTheory: 0m1s
 src/abstract-set-theory: 0m0s
