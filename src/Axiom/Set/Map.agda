@@ -398,8 +398,9 @@ module Lookupᵐ (sp-∈ : spec-∈ A) where
     ∈⇒lookup≡just P ⦃ ⁇ (yes q') ⦄ = cong just (∈-lookup q' P)
     ∈⇒lookup≡just P ⦃ ⁇ (no ¬q') ⦄ = ⊥-elim (¬q' (to dom∈ (_ , P)))
 
-  pullbackMap : (m : Map A B) → ⦃ ∀ {x} → (x ∈ dom (m ˢ)) ⁇ ⦄ → (A' → A) → Set A' → Map A' B
-  pullbackMap m f s = mapMaybeWithKeyᵐ (λ a _ → lookupᵐ? m (f a)) (idMap s)
+  opaque
+    pullbackMap : (m : Map A B) → ⦃ ∀ {x} → (x ∈ dom (m ˢ)) ⁇ ⦄ → (A' → A) → Set A' → Map A' B
+    pullbackMap m f s = mapMaybeWithKeyᵐ (λ a _ → lookupᵐ? m (f a)) (idMap s)
 
 module Corestrictionᵐ (sp-∈ : spec-∈ B) where
   private module R = Corestriction sp-∈
