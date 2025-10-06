@@ -40,6 +40,8 @@ open import Class.HasSingleton th public
 
 open import Axiom.Set.Properties th using (card-≡ᵉ)
 
+infixr 9 _∘ʳ_
+
 module _ ⦃ _ : DecEq A ⦄ where
   open Restriction {A} ∈-sp public
     renaming (_∣_ to _∣ʳ_; _∣_ᶜ to _∣ʳ_ᶜ)

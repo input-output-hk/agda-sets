@@ -25,6 +25,8 @@ open import Tactic.Defaults
 
 open Equivalence
 
+infix 10 _⁻¹ʳ
+
 -- Because of missing macro hygiene, we have to copy&paste this.
 -- c.f. https://github.com/agda/agda/issues/3819
 private macro
