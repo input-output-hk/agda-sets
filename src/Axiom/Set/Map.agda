@@ -135,6 +135,10 @@ disj-∪ m m' disj = m ˢ ∪ m' ˢ , λ h h' → case ∈⇔P h , ∈⇔P h' of
 filterᵐ : {P : Pred (A × B) 0ℓ} → specProperty P → Map A B → Map A B
 filterᵐ sp-P m = filter sp-P (m ˢ) , ⊆-left-unique filter-⊆ (proj₂ m)
 
+filterᵐ-idem : {P : Pred (A × B) 0ℓ} {spP : specProperty P} {m : Map A B}
+             → filterᵐ spP (filterᵐ spP m) ≡ᵐ filterᵐ spP m
+filterᵐ-idem = filter-idem
+
 filterᵐ-finite : {P : A × B → Type} → (sp : specProperty P) → Decidable P
   → finite (m ˢ) → finite (filterᵐ sp m ˢ)
 filterᵐ-finite = filter-finite
