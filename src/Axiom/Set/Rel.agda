@@ -296,3 +296,9 @@ module Corestriction (sp-∈ : spec-∈ B) where
 
   coex-⊆ : (R ∣^ X ᶜ) ⊆ R
   coex-⊆ = proj₂ ∘′ ∈⇔P
+
+  cores-cong : ∀ {R Q : Rel A B} {X Y : Set B}
+             → X ⊆ Y → R ⊆ Q
+             → R ∣^ X ⊆ Q ∣^ Y
+  cores-cong X⊆Y R⊆Y p with from ∈-filter p
+  ... | (q , p) = to ∈-filter (X⊆Y q , R⊆Y p)

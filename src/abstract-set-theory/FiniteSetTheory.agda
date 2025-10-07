@@ -49,8 +49,10 @@ module _ ⦃ _ : DecEq A ⦄ where
   open Corestriction {A} ∈-sp public
     renaming (_∣^_ to _∣^ʳ_; _∣^_ᶜ to _∣^ʳ_ᶜ) public
 
-  open Restrictionᵐ {A} ∈-sp public
-  open Corestrictionᵐ {A} ∈-sp public
+  open Restrictionᵐ {A} ∈-sp
+    renaming (res-cong to resᵐ-cong) public
+  open Corestrictionᵐ {A} ∈-sp
+    renaming (cores-cong to coresᵐ-cong) public
   open Unionᵐ {A} ∈-sp public
   open Intersection {A} ∈-sp public
   open Lookupᵐ {A} ∈-sp public
