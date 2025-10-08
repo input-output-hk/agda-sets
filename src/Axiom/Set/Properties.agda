@@ -231,6 +231,18 @@ module _ {P : A → Type} {sp-P : specProperty P} where
   filter-⊆ : filter sp-P X ⊆ X
   filter-⊆ = proj₂ ∘′ ∈⇔P
 
+  filter-idem : filter sp-P (filter sp-P X) ≡ᵉ filter sp-P X
+  filter-idem = filter-idem-⊆ , filter-idem-⊇
+    where
+      filter-idem-⊆ : filter sp-P (filter sp-P X) ⊆ filter sp-P X
+      filter-idem-⊆ p with from ∈-filter p
+      ... | (_ , p) with from ∈-filter p
+      ... | (q , p) = to ∈-filter (q , p)
+
+      filter-idem-⊇ : filter sp-P X ⊆ filter sp-P (filter sp-P X)
+      filter-idem-⊇ p with from ∈-filter p
+      ... | (q , p) = to ∈-filter (q , (to ∈-filter (q , p)))
+
   filter-pres-⊆ : X ⊆ Y → filter sp-P X ⊆ filter sp-P Y
   filter-pres-⊆ xy a∈ = let Pa∈ = from ∈-filter a∈ in
     to ∈-filter (map₂ xy Pa∈)

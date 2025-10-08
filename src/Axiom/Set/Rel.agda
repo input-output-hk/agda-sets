@@ -25,6 +25,8 @@ open import Tactic.Defaults
 
 open Equivalence
 
+infix 10 _⁻¹ʳ
+
 -- Because of missing macro hygiene, we have to copy&paste this.
 -- c.f. https://github.com/agda/agda/issues/3819
 private macro
@@ -294,3 +296,9 @@ module Corestriction (sp-∈ : spec-∈ B) where
 
   coex-⊆ : (R ∣^ X ᶜ) ⊆ R
   coex-⊆ = proj₂ ∘′ ∈⇔P
+
+  cores-cong : ∀ {R Q : Rel A B} {X Y : Set B}
+             → X ⊆ Y → R ⊆ Q
+             → R ∣^ X ⊆ Q ∣^ Y
+  cores-cong X⊆Y R⊆Y p with from ∈-filter p
+  ... | (q , p) = to ∈-filter (X⊆Y q , R⊆Y p)

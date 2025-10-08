@@ -132,8 +132,31 @@ disj-∪ m m' disj = m ˢ ∪ m' ˢ , λ h h' → case ∈⇔P h , ∈⇔P h' of
   (inj₁ hm  , inj₂ h'm') → ⊥-elim $ disj (∈-map⁺'' hm)  (∈-map⁺'' h'm')
   (inj₂ hm' , inj₂ h'm') → proj₂ m' hm' h'm'
 
+disj-∪-cong : {m m' m'' m''' : Map A B}
+              {m∩m'≡∅ : disjoint (dom (m ˢ)) (dom (m' ˢ))}
+              {m''∩m'''≡∅ : disjoint (dom (m'' ˢ)) (dom (m''' ˢ))}
+              → m ≡ᵐ m'' → m' ≡ᵐ m'''
+              → disj-∪ m m' m∩m'≡∅ ≡ᵐ disj-∪ m'' m''' m''∩m'''≡∅
+disj-∪-cong m≡m' m''≡m''' = ∪-cong m≡m' m''≡m'''
+
 filterᵐ : {P : Pred (A × B) 0ℓ} → specProperty P → Map A B → Map A B
 filterᵐ sp-P m = filter sp-P (m ˢ) , ⊆-left-unique filter-⊆ (proj₂ m)
+
+module _ {P : Pred (A × B) 0ℓ} {spP : specProperty P} where
+  filterᵐ-idem : ∀ {m : Map A B} → filterᵐ spP (filterᵐ spP m) ≡ᵐ filterᵐ spP m
+  filterᵐ-idem = filter-idem
+
+  filterᵐ-cong : ∀ {m m' : Map A B}
+               → m ≡ᵐ m' → filterᵐ spP m ≡ᵐ filterᵐ spP m'
+  filterᵐ-cong {m = m} {m' = m'} m≡m' = filterᵐspPm⊆filterᵐspPm' , filterᵐspPm⊇filterᵐspPm'
+    where
+      filterᵐspPm⊆filterᵐspPm' : filterᵐ spP m ˢ ⊆ filterᵐ spP m' ˢ
+      filterᵐspPm⊆filterᵐspPm' p with from ∈-filter p
+      ... | (q , p) = to ∈-filter (q , proj₁ m≡m' p)
+
+      filterᵐspPm⊇filterᵐspPm' : filterᵐ spP m' ˢ ⊆ filterᵐ spP m ˢ
+      filterᵐspPm⊇filterᵐspPm' p with from ∈-filter p
+      ... | (q , p) = to ∈-filter (q , proj₂ m≡m' p)
 
 filterᵐ-finite : {P : A × B → Type} → (sp : specProperty P) → Decidable P
   → finite (m ˢ) → finite (filterᵐ sp m ˢ)
@@ -196,9 +219,28 @@ module Unionᵐ (sp-∈ : spec-∈ A) where
   _∪ˡ'_ : Rel A B → Rel A B → Rel A B
   m ∪ˡ' m' = m ∪ filter (sp-∘ (sp-¬ (sp-∈ {dom m})) proj₁) m'
 
+  private
+     disjoint-proof : ∀ (m m' : Map A B)
+                    → disjoint (dom (m ˢ)) (dom (filterᵐ (sp-∘ (sp-¬ (sp-∈ {dom (m ˢ)})) (λ r → proj₁ r)) m' ˢ))
+     disjoint-proof m m' p q with from ∈-map q
+     ... | _ , refl , q with from ∈-filter q
+     ... | q , _ = q p
+
   _∪ˡ_ : Map A B → Map A B → Map A B
-  m ∪ˡ m' = disj-∪ m (filterᵐ (sp-∘ (sp-¬ sp-∈) proj₁) m')
-      (∈⇔P -⟨ (λ where x (_ , refl , hy) → proj₁ (∈⇔P hy) (∈⇔P x)) ⟩- ∈⇔P)
+  m ∪ˡ m' = disj-∪ m (filterᵐ (sp-∘ (sp-¬ sp-∈) proj₁) m') (disjoint-proof m m')
+
+  ∪ˡ-cong : ∀ {m m' m'' m''' : Map A B} → m ≡ᵐ m'' → m' ≡ᵐ m''' → (m ∪ˡ m') ≡ᵐ (m'' ∪ˡ m''')
+  ∪ˡ-cong {m = m} {m' = m'} {m'' = m''} {m''' = m'''} m≡m'' m'≡m'''
+    = disj-∪-cong {m = m} {m' = (filterᵐ (sp-∘ (sp-¬ sp-∈) proj₁) m')} {m'' = m''} {m''' = (filterᵐ (sp-∘ (sp-¬ sp-∈) proj₁) m''')}
+                  {m∩m'≡∅ = disjoint-proof m m'} {m''∩m'''≡∅ = disjoint-proof m'' m'''} m≡m'' (⊆ , ⊇)
+    where
+      ⊇ : filterᵐ (sp-∘ (sp-¬ sp-∈) proj₁) m''' ˢ ⊆ filterᵐ (sp-∘ (sp-¬ sp-∈) proj₁) m' ˢ
+      ⊇ p with from ∈-filter p
+      ... | p , q = to ∈-filter ((λ x → p (dom-cong m≡m'' .proj₁ x)) , m'≡m''' .proj₂ q)
+
+      ⊆ : filterᵐ (sp-∘ (sp-¬ sp-∈) proj₁) m' ˢ ⊆ filterᵐ (sp-∘ (sp-¬ sp-∈) proj₁) m''' ˢ
+      ⊆ p with from ∈-filter p
+      ... | p , q = to ∈-filter ((λ x → p (dom-cong m≡m'' .proj₂ x)) , m'≡m''' .proj₁ q)
 
   disjoint-∪ˡ-∪ : (H : disjoint (dom R) (dom R')) → R ∪ˡ' R' ≡ᵉ R ∪ R'
   disjoint-∪ˡ-∪ disj = from ≡ᵉ⇔≡ᵉ' λ _ → mk⇔
@@ -331,6 +373,19 @@ module Restrictionᵐ (sp-∈ : spec-∈ A) where
   res-dom∈ : ∀ {b} → (a , b) ∈ (m ∣ X) ˢ ⇔ ((a , b) ∈ m ˢ × a ∈ X)
   res-dom∈ = R.∈-res
 
+  res-cong : ∀ {m m' : Map A B} {X Y : Set A}
+           → m ≡ᵐ m' → X ≡ᵉ Y
+           → m ∣ X ≡ᵐ m' ∣ Y
+  res-cong {m = m} {m' = m'} {X = X} {Y = Y} m≡m' X≡Y = ⊆ , ⊇
+    where
+      ⊇ : (m' ∣ Y) ˢ ⊆ (m ∣ X) ˢ
+      ⊇ p with to (res-dom∈ {m = m'}) p
+      ... | (p , q) = from (res-dom∈ {m = m}) (m≡m' .proj₂ p , (X≡Y .proj₂ q))
+
+      ⊆ : (m ∣ X) ˢ ⊆ (m' ∣ Y) ˢ
+      ⊆ p with to (res-dom∈ {m = m}) p
+      ... | (p , q) = from (res-dom∈ {m = m'}) (m≡m' .proj₁ p , (X≡Y .proj₁ q))
+
   res-subset : R ⊆ m ˢ → (m ∣ dom R) ˢ ≡ᵉ R
   res-subset {m = _ , uniq} R⊆m .proj₁ {a , b} ab∈ with from dom∈ (R.res-dom $ to dom∈ (b , ab∈))
   ... | b' , ab'∈ = subst (λ u → (a , u) ∈ _) (uniq (R⊆m ab'∈) $ R.res-⊆ ab∈) ab'∈
@@ -414,3 +469,20 @@ module Corestrictionᵐ (sp-∈ : spec-∈ B) where
   infix 25 _⁻¹_
   _⁻¹_ : Map A B → B → Set A
   m ⁻¹ a = dom ((m ∣^ ❴ a ❵) ˢ)
+
+  cores-cong : ∀ {m m' : Map A B} {X Y : Set B}
+             → m ≡ᵐ m' → X ≡ᵉ Y
+             → m ∣^ X ≡ᵐ m' ∣^ Y
+  cores-cong {m = m} {m' = m'} {X = X} {Y = Y} m≡m' X≡Y = ⊆ , ⊇
+    where
+      ⊇ : (m' ∣^ Y) ˢ ⊆ (m ∣^ X) ˢ
+      ⊇ x with from ∈-filter x
+      ... | (p , q) = to ∈-filter (X≡Y .proj₂ p , m≡m' .proj₂ q)
+
+      ⊆ : (m ∣^ X) ˢ ⊆ (m' ∣^ Y) ˢ
+      ⊆ x with from ∈-filter x
+      ⊆ x | (p , q) = to ∈-filter (X≡Y .proj₁ p , m≡m' .proj₁ q)
+
+  ⁻¹-cong : ∀ {m m' : Map A B} {b : B}
+          → m ≡ᵐ m' → (m ⁻¹ b) ≡ᵉ (m' ⁻¹ b)
+  ⁻¹-cong {m = m} {m' = m'} m≡m' = dom-cong (cores-cong {m = m} {m' = m'} m≡m' (id , id))
