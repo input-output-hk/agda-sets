@@ -55,6 +55,17 @@
       {
         packages.default = pkgs.agdaPackages.abstract-set-theory;
         devShells.default = pkgs.agda.shellFor pkgs.agdaPackages.abstract-set-theory;
+        hydraJobs =
+          let
+            jobs = { inherit (self) packages devShells; };
+          in
+          jobs
+          // {
+            required = pkgs.releaseTools.aggregate {
+              name = "${system}-required";
+              constituents = with nixpkgs.lib; collect isDerivation jobs;
+            };
+          };
       }
     )
     // {
