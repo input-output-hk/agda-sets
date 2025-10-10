@@ -31,6 +31,11 @@
       ...
     }:
     let
+      systems = [
+        "x86_64-linux"
+        "aarch64-darwin"
+      ];
+
       overlay = final: prev: {
         agdaPackages = prev.agdaPackages.overrideScope (
           afinal: aprev: {
@@ -39,7 +44,7 @@
         );
       };
     in
-    flake-utils.lib.eachDefaultSystem (
+    flake-utils.lib.eachSystem systems (
       system:
       let
         pkgs = import nixpkgs {
