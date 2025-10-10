@@ -35,14 +35,17 @@
         "x86_64-linux"
         "aarch64-darwin"
       ];
-
-      overlay = final: prev: {
-        agdaPackages = prev.agdaPackages.overrideScope (
-          afinal: aprev: {
-            abstract-set-theory = afinal.callPackage ./nix/abstract-set-theory.nix { };
-          }
-        );
-      };
+      overlay = nixpkgs.lib.composeManyExtensions [
+        inputs.standard-library-classes.overlays.default
+        inputs.standard-library-meta.overlays.default
+        (final: prev: {
+          agdaPackages = prev.agdaPackages.overrideScope (
+            afinal: aprev: {
+              abstract-set-theory = afinal.callPackage ./nix/abstract-set-theory.nix { };
+            }
+          );
+        })
+      ];
     in
     flake-utils.lib.eachSystem systems (
       system:
@@ -51,8 +54,6 @@
           inherit system;
           overlays = [
             inputs.shellFor.overlays.default
-            inputs.standard-library-classes.overlays.default
-            inputs.standard-library-meta.overlays.default
             overlay
           ];
         };
