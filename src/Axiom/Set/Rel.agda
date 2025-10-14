@@ -61,6 +61,10 @@ _⁻¹ʳ : {A B : Type} → Rel A B → Rel B A
 R ⁻¹ʳ = map swap R
   where open import Data.Product using (swap)
 
+⁻¹ʳ-cong : {A B : Type} {R S : Rel A B}
+         → R ≡ᵉ S → R ⁻¹ʳ ≡ᵉ S ⁻¹ʳ
+⁻¹ʳ-cong = map-≡ᵉ
+
 disjoint-dom⇒disjoint : disjoint (dom R) (dom R') → disjoint R R'
 disjoint-dom⇒disjoint disj = ∈-map⁺'' -⟨ disj ⟩- ∈-map⁺''
 

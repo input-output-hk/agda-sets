@@ -221,6 +221,41 @@ singleton-≢-∅ {A = A} {a = a} X≡∅ =
     of λ ()
   where open IsEquivalence (≡ᵉ-isEquivalence {A}) renaming (refl to ≡ᵉ-refl)
 
+module _ {P Q : A → Type} {sp-P : specProperty P} {sp-Q : specProperty Q} where
+
+  import Relation.Unary as U
+
+  filter-⇒ : (P⇒Q : U.Universal (P U.⇒ Q)) → filter sp-P (filter sp-Q X) ≡ᵉ filter sp-P X
+  filter-⇒ P⇒Q = filter-⇒-⊆ , filter-⇒-⊇
+    where
+      filter-⇒-⊆ : filter sp-P (filter sp-Q X) ⊆ filter sp-P X
+      filter-⇒-⊆ p with from ∈-filter p
+      ... | (q , p) with from ∈-filter p
+      ... | (_ , p) = to ∈-filter (q , p)
+
+      filter-⇒-⊇ : filter sp-P X ⊆ filter sp-P (filter sp-Q X)
+      filter-⇒-⊇ p with from ∈-filter p
+      ... | (q , p) = to ∈-filter (q , (to ∈-filter (P⇒Q _ q , p)))
+
+module _ {P : A → Type} {sp-P : specProperty P} {Q : B → Type} {sp-Q : specProperty Q} where
+
+  import Relation.Unary as U
+
+  module _ {f : A → B} (Qf⇒P : U.Universal ((Q ∘ f) U.⇒ P)) where
+    filter-map : filter sp-Q (map f X) ≡ᵉ filter sp-Q (map f (filter sp-P X))
+    filter-map = filter-map-⊆ , filter-map-⊇
+      where
+        filter-map-⊆ : filter sp-Q (map f X) ⊆ filter sp-Q (map f (filter sp-P X))
+        filter-map-⊆ p with from ∈-filter p
+        ... | Qa , p with from ∈-map p
+        ... | (a , refl , p) = to ∈-filter (Qa , (to ∈-map (_ , (refl , (to ∈-filter (Qf⇒P a Qa , p))))))
+
+        filter-map-⊇ : filter sp-Q (map f (filter sp-P X)) ⊆ filter sp-Q (map f X)
+        filter-map-⊇ p with from ∈-filter p
+        ... | Qfa , p with from ∈-map p
+        ... | (a , refl , p) with from ∈-filter p
+        ... | (Pa , p) = to ∈-filter (Qfa , (to ∈-map (a , (refl , p))))
+
 module _ {P : A → Type} {sp-P : specProperty P} where
 
   filter-∅ : (∀ a → a ∈ X → ¬ P a) → filter sp-P X ≡ᵉ ∅
@@ -232,16 +267,7 @@ module _ {P : A → Type} {sp-P : specProperty P} where
   filter-⊆ = proj₂ ∘′ ∈⇔P
 
   filter-idem : filter sp-P (filter sp-P X) ≡ᵉ filter sp-P X
-  filter-idem = filter-idem-⊆ , filter-idem-⊇
-    where
-      filter-idem-⊆ : filter sp-P (filter sp-P X) ⊆ filter sp-P X
-      filter-idem-⊆ p with from ∈-filter p
-      ... | (_ , p) with from ∈-filter p
-      ... | (q , p) = to ∈-filter (q , p)
-
-      filter-idem-⊇ : filter sp-P X ⊆ filter sp-P (filter sp-P X)
-      filter-idem-⊇ p with from ∈-filter p
-      ... | (q , p) = to ∈-filter (q , (to ∈-filter (q , p)))
+  filter-idem = filter-⇒ (λ x Px → Px)
 
   filter-pres-⊆ : X ⊆ Y → filter sp-P X ⊆ filter sp-P Y
   filter-pres-⊆ xy a∈ = let Pa∈ = from ∈-filter a∈ in
