@@ -292,6 +292,21 @@ idMap s = -, map⦅×-dup⦆-uniq {x = s}
 mapFromFun : (A → B) → Set A → Map A B
 mapFromFun f s = mapValues f (idMap s)
 
+mapFromFun-cong : ∀ {X Y : Set A} (f : A → B)
+                → X ≡ᵉ Y
+                → mapFromFun f X ≡ᵐ mapFromFun f Y
+mapFromFun-cong {X = X} {Y} f X≡Y = mapFromFunfX⊆mapFromFunfY , mapFromFunfY⊆mapFromFunfX
+  where
+      mapFromFunfX⊆mapFromFunfY : mapFromFun f X ˢ ⊆ mapFromFun f Y ˢ
+      mapFromFunfX⊆mapFromFunfY p with from ∈-map p
+      ... | ((a , b) , refl , p) with from ∈-map p
+      ... | (c , refl , p) = to ∈-map ((a , b) , refl , (to ∈-map (a , (refl , (X≡Y .proj₁ p)))))
+
+      mapFromFunfY⊆mapFromFunfX : mapFromFun f Y ˢ ⊆ mapFromFun f X ˢ
+      mapFromFunfY⊆mapFromFunfX p with from ∈-map p
+      ... | ((a , b) , refl , p) with from ∈-map p
+      ... | (c , refl , p) = to ∈-map ((a , b) , refl , (to ∈-map (a , (refl , (X≡Y .proj₂ p)))))
+
 mapWithKey-uniq : {f : A → B → B'}
   → left-unique R
   → left-unique (mapˢ (λ { (x , y) → x , f x y }) R)

@@ -112,6 +112,25 @@ R ∘ʳ S =
     (λ (a , b) → mapˢ ((a ,_) ∘ proj₂) $ filterˢ ((b ≡_) ∘ proj₁) S)
     R
 
+module _ {A B C : Type} ⦃ _ : DecEq B ⦄ {R R' : Rel A B} {S S' : Rel B C} where
+
+  open Equivalence
+
+  ∘ʳ-cong : R ≡ᵉ R' → S ≡ᵉ S'
+          → R ∘ʳ S  ≡ᵉ R' ∘ʳ S'
+  ∘ʳ-cong R≡R' S≡S' = ∘ʳ-cong-⊆ , ∘ʳ-cong-⊇
+    where ∘ʳ-cong-⊆ : R ∘ʳ S  ⊆ R' ∘ʳ S'
+          ∘ʳ-cong-⊆ p with from ∈-concatMapˢ p
+          ... | (a , a∈R , p) with from ∈-map p
+          ... | _ , refl , p with from ∈-filter p
+          ... | (p , q) = to ∈-concatMapˢ (a , R≡R' .proj₁ a∈R , to ∈-map (_ , (refl , to ∈-filter (p , S≡S' .proj₁ q))))
+
+          ∘ʳ-cong-⊇ : R' ∘ʳ S'  ⊆ R ∘ʳ S
+          ∘ʳ-cong-⊇ p with from ∈-concatMapˢ p
+          ... | (a , a∈R , p) with from ∈-map p
+          ... | _ , refl , p with from ∈-filter p
+          ... | (p , q) = to ∈-concatMapˢ (a , R≡R' .proj₂ a∈R , to ∈-map (_ , (refl , to ∈-filter (p , S≡S' .proj₂ q))))
+
 filterᵐ : (P : A × B → Type) ⦃ _ : P ⁇¹ ⦄ → (A ⇀ B) → (A ⇀ B)
 filterᵐ P = filterᵐ? (to-sp P)
 

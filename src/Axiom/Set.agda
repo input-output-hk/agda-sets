@@ -13,7 +13,8 @@ open import Data.Product.Algebra using (×-comm)
 open import Data.Product.Properties using (∃∃↔∃∃)
 open import Data.Product.Properties.Ext using (∃-cong′; ∃-≡)
 open import Class.DecEq using (DecEq; _≟_)
-open import Relation.Binary using () renaming (Decidable to Dec₂)
+open import Relation.Nullary.Decidable using (_×-dec_)
+import Relation.Unary as U
 
 private variable
   ℓ : Level
@@ -31,11 +32,13 @@ record SpecProperty {ℓ} : Type (sucˡ ℓ) where
   field specProperty : {A : Type ℓ} → (A → Type) → Type
         sp-∘ : specProperty P → (f : B → A) → specProperty (P ∘ f)
         sp-¬ : specProperty P → specProperty (¬_ ∘ P)
+        sp-∩ : ∀ {P Q : A → Type} → specProperty P → specProperty Q → specProperty (P U.∩ Q)
 
 ⊤-SpecProperty : ∀ {a} → SpecProperty {a}
 ⊤-SpecProperty = record
   { specProperty = λ _ → ⊤
   ; sp-∘         = λ _ _ → _
+  ; sp-∩         = λ _ _ → _
   ; sp-¬         = λ _ → _
   }
 
@@ -44,6 +47,7 @@ Dec-SpecProperty = record
   { specProperty = Decidable¹
   ; sp-∘         = λ P? → P? ∘_
   ; sp-¬         = λ P? → ¬? ∘ P?
+  ; sp-∩         = λ P? Q? _ → P? _ ×-dec Q? _
   }
 
 record Theory {ℓ} : Type (sucˡ ℓ) where

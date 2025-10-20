@@ -221,6 +221,44 @@ singleton-≢-∅ {A = A} {a = a} X≡∅ =
     of λ ()
   where open IsEquivalence (≡ᵉ-isEquivalence {A}) renaming (refl to ≡ᵉ-refl)
 
+module _ {P Q : A → Type} {sp-P : specProperty P} {sp-Q : specProperty Q} where
+
+  filter-∩ : filter sp-P (filter sp-Q X) ≡ᵉ filter (sp-∩ sp-P sp-Q) X
+  filter-∩ = filter-∩-⊆ , filter-∩-⊇
+    where
+      filter-∩-⊆ : filter sp-P (filter sp-Q X) ⊆ filter (sp-∩ sp-P sp-Q) X
+      filter-∩-⊆ p with from ∈-filter p
+      ... | (Pa , p) with from ∈-filter p
+      ... | (Qa , p) = to ∈-filter ((Pa , Qa) , p)
+
+      filter-∩-⊇ : filter (sp-∩ sp-P sp-Q) X ⊆ filter sp-P (filter sp-Q X)
+      filter-∩-⊇ p with from ∈-filter p
+      ... | ((Pa , Qa) , p) = to ∈-filter (Pa , (to ∈-filter (Qa , p)))
+
+module _ {P : A → Type} {sp-P : specProperty P} {Q : B → Type} {sp-Q : specProperty Q} where
+
+  module _ {f : B → A} where
+    filter-map : filter sp-P (map f X) ≡ᵉ map f (filter (sp-∘ sp-P f) X)
+    filter-map = filter-map-⊆ , filter-map-⊇
+      where
+        filter-map-⊆ : filter sp-P (map f X) ⊆ map f (filter (sp-∘ sp-P f) X)
+        filter-map-⊆ p with from ∈-filter p
+        ... | Pa , p with from ∈-map p
+        ... | (a , refl , p) = to ∈-map (a , (refl , (to ∈-filter (Pa , p))))
+
+        filter-map-⊇ : map f (filter (sp-∘ sp-P f) X) ⊆ filter sp-P (map f X)
+        filter-map-⊇ p with from ∈-map p
+        ... | (a , refl , p) with from ∈-filter p
+        ... | (Pfa , p) = to ∈-filter (Pfa , (to ∈-map (a , refl , p)))
+
+module _ {P Q : A → Type} {sp-P : specProperty P} {sp-Q : specProperty Q} where
+
+  import Relation.Unary as U
+
+  filter-⇒-⊆ : U.Universal (P U.⇒ Q) → filter sp-P X ⊆ filter sp-Q X
+  filter-⇒-⊆ P⇒Q p with from ∈-filter p
+  ... | (Pa , p) = to ∈-filter ((P⇒Q _ Pa) , p)
+
 module _ {P : A → Type} {sp-P : specProperty P} where
 
   filter-∅ : (∀ a → a ∈ X → ¬ P a) → filter sp-P X ≡ᵉ ∅
@@ -231,24 +269,24 @@ module _ {P : A → Type} {sp-P : specProperty P} where
   filter-⊆ : filter sp-P X ⊆ X
   filter-⊆ = proj₂ ∘′ ∈⇔P
 
-  filter-idem : filter sp-P (filter sp-P X) ≡ᵉ filter sp-P X
-  filter-idem = filter-idem-⊆ , filter-idem-⊇
-    where
-      filter-idem-⊆ : filter sp-P (filter sp-P X) ⊆ filter sp-P X
-      filter-idem-⊆ p with from ∈-filter p
-      ... | (_ , p) with from ∈-filter p
-      ... | (q , p) = to ∈-filter (q , p)
-
-      filter-idem-⊇ : filter sp-P X ⊆ filter sp-P (filter sp-P X)
-      filter-idem-⊇ p with from ∈-filter p
-      ... | (q , p) = to ∈-filter (q , (to ∈-filter (q , p)))
-
   filter-pres-⊆ : X ⊆ Y → filter sp-P X ⊆ filter sp-P Y
   filter-pres-⊆ xy a∈ = let Pa∈ = from ∈-filter a∈ in
     to ∈-filter (map₂ xy Pa∈)
 
   filter-cong : X ≡ᵉ Y → filter sp-P X ≡ᵉ filter sp-P Y
   filter-cong (X⊆Y , Y⊆X) = filter-pres-⊆ X⊆Y , filter-pres-⊆ Y⊆X
+
+  filter-idem : filter sp-P (filter sp-P X) ≡ᵉ filter sp-P X
+  filter-idem {X = X} =
+    begin
+     filter sp-P (filter sp-P X)
+       ≈⟨ filter-∩ ⟩
+     filter (sp-∩ sp-P sp-P) X
+       ≈⟨ filter-⇒-⊆ (λ _ Pa×Pa → Pa×Pa .proj₁) , filter-⇒-⊆ (λ _ Pa → Pa , Pa) ⟩
+     filter sp-P X
+    ∎
+    where
+      open import Relation.Binary.Reasoning.Setoid ≡ᵉ-Setoid
 
   filter-split-∪ : ∀ {a} → a ∈ filter sp-P (X ∪ Y) → (P a × a ∈ X) ⊎ (P a × a ∈ Y)
   filter-split-∪ a∈ = case (proj₁ (from ∈-filter a∈) , from ∈-∪ (proj₂ (from ∈-filter a∈))) of
