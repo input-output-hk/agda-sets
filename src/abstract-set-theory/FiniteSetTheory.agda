@@ -30,6 +30,7 @@ open import Axiom.Set.Map th public
 
 open import Axiom.Set.Factor List-Model public
 open import Axiom.Set.Map.Dec List-Modelᵈ public
+open import Axiom.Set.Properties th using (≡ᵉ-isEquivalence)
 open import Axiom.Set.Rel th public hiding (_∣'_; _∣^'_; dom; range)
 open import Axiom.Set.Sum th public
 open import Axiom.Set.TotalMap th public
@@ -156,3 +157,18 @@ module _ ⦃ _ : DecEq A ⦄ ⦃ _ : DecEq B ⦄ ⦃ _ : CommutativeMonoid 0ℓ 
 
   indexedSumᵛ'-cong : ∀ {f : B → C} → indexedSumᵛ' f Preserves _≡ᵉ_ on proj₁ ⟶ CommutativeMonoid._≈_ it
   indexedSumᵛ'-cong {x = x} {y} = indexedSum-cong {A = A × B} {x = (x ˢ) ᶠˢ} {(y ˢ) ᶠˢ}
+
+  indexedSumᵐ-∪ˡ-∪ˡᶠ
+    : ∀ ⦃ _ : DecEq C ⦄ (m : A ⇀ C) (m' : A ⇀ C)
+    → CommutativeMonoid._≈_ it
+        (indexedSumᵐ proj₂ ((m ∪ˡ m') ᶠᵐ))
+        (indexedSumᵐ proj₂ ((m ᶠᵐ) ∪ˡᶠ (m' ᶠᵐ)))
+  indexedSumᵐ-∪ˡ-∪ˡᶠ m m' =
+      indexedSumᵐ-cong
+        {f = proj₂}
+        {x = (m ∪ˡ m') ᶠᵐ}
+        {y = (m ᶠᵐ) ∪ˡᶠ (m' ᶠᵐ)}
+        ≡ᵉ.refl
+    where
+      open import Relation.Binary.Structures using (IsEquivalence)
+      module ≡ᵉ = IsEquivalence ≡ᵉ-isEquivalence
