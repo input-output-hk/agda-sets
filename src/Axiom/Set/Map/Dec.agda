@@ -8,10 +8,11 @@ open import abstract-set-theory.Prelude hiding (map; Monoid)
 import Data.Sum as Sum
 open import Data.These hiding (map)
 
-open Theoryᵈ thᵈ using (_∈?_; th; incl-set'; incl-set; incl-set-proj₁⊇)
+open Theoryᵈ thᵈ using (_∈?_; ∈-sp; th; incl-set'; incl-set; incl-set-proj₁⊇)
 open Theory th
-open import Axiom.Set.Rel th using (dom; dom∈)
+open import Axiom.Set.Rel th using (Rel; dom; dom∈; dom∪)
 open import Axiom.Set.Map th
+open import Axiom.Set.Properties th using (∈-∪⁺; ∈-∪⁻; ∪-⊆ˡ)
 open import Data.Product.Properties using (×-≡,≡→≡; ×-≡,≡←≡)
 
 open Equivalence
@@ -87,3 +88,57 @@ module Lookupᵐᵈ (sp-∈ : spec-∈ A) where
 
       dom∪⁺≡∪dom : dom ((m ∪⁺ m')ˢ) ≡ᵉ dom (m ˢ) ∪ dom (m' ˢ)
       dom∪⁺≡∪dom = to dom∪⁺⇔∪dom , from dom∪⁺⇔∪dom
+
+
+      open import Function.Reasoning
+      open Unionᵐ sp-∈ using (_∪ˡ_)
+
+      private
+        rhs-∪ˡ : Rel A V
+        rhs-∪ˡ = (filterᵐ (sp-∘ (sp-¬ (sp-∈ {X = dom (m ˢ)})) proj₁) m') ˢ
+
+      dom∪ˡˡ : dom (m ˢ) ⊆ dom ((m ∪ˡ m') ˢ)
+      dom∪ˡˡ {a} a∈ = a∈ ∶
+          a ∈ dom (m ˢ)               |> ∪-⊆ˡ ∶
+          a ∈ dom (m ˢ) ∪ dom rhs-∪ˡ  |> proj₂ dom∪ ∶
+          a ∈ dom ((m ˢ) ∪ rhs-∪ˡ)    |> id ∶
+          a ∈ dom ((m ∪ˡ m') ˢ)
+
+      dom∪ˡʳ : dom (m' ˢ) ⊆ dom ((m ∪ˡ m') ˢ)
+      dom∪ˡʳ {a} a∈ with a ∈? dom (m ˢ)
+      ... | yes p = dom∪ˡˡ p
+      ... | no ¬p = a∈ ∶
+          a ∈ dom (m' ˢ)                        |> from ∈-map ∶
+          (∃[ ab ] a ≡ proj₁ ab × ab ∈ (m' ˢ))  |>′
+             (λ { (ab , refl , ab∈m') → (¬p , ab∈m') ∶
+                 (a ∉ dom (m ˢ) × ab ∈ (m' ˢ))  |> to ∈-filter ∶
+                 ab ∈ rhs-∪ˡ                    |> (λ ab∈f → to ∈-map (ab , refl , ab∈f)) ∶
+                 a ∈ dom rhs-∪ˡ
+             }) ∶
+          a ∈ dom rhs-∪ˡ              |> ∈-∪⁺ ∘ inj₂ ∶
+          a ∈ dom (m ˢ) ∪ dom rhs-∪ˡ  |> proj₂ dom∪ ∶
+          a ∈ dom ((m ˢ) ∪ rhs-∪ˡ)    |> id ∶
+          a ∈ dom ((m ∪ˡ m') ˢ)
+
+      dom∪ˡ⊆∪dom : dom ((m ∪ˡ m') ˢ) ⊆ dom (m ˢ) ∪ dom (m' ˢ)
+      dom∪ˡ⊆∪dom {a} a∈dom∪ with ∈-∪⁻ (proj₁ dom∪ a∈dom∪)
+      ... | inj₁ a∈domm = ∈-∪⁺ (inj₁ a∈domm)
+      ... | inj₂ a∈domf = a∈domf ∶
+          a ∈ dom rhs-∪ˡ                        |> from ∈-map ∶
+          (∃[ ab ] a ≡ proj₁ ab × ab ∈ rhs-∪ˡ)  |>′
+             (λ { (ab , refl , ab∈fm') →
+                 ab ∈ rhs-∪ˡ ∋ ab∈fm'           |> proj₂ ∘ from ∈-filter ∶
+                 ab ∈ (m' ˢ)                    |> (λ ab∈m' → to ∈-map (ab , refl , ab∈m')) ∶
+                 a ∈ dom (m' ˢ)
+             }) ∶
+          a ∈ dom (m' ˢ)              |> ∈-∪⁺ ∘ inj₂ ∶
+          a ∈ dom (m ˢ) ∪ dom (m' ˢ)
+
+      ∪dom⊆dom∪ˡ : dom (m ˢ) ∪ dom (m' ˢ) ⊆ dom ((m ∪ˡ m') ˢ)
+      ∪dom⊆dom∪ˡ {a} a∈
+        with from ∈-∪ a∈
+      ... | inj₁ a∈ˡ = dom∪ˡˡ a∈ˡ
+      ... | inj₂ a∈ʳ = dom∪ˡʳ a∈ʳ
+
+      dom∪ˡ≡∪dom : dom ((m ∪ˡ m')ˢ) ≡ᵉ dom (m ˢ) ∪ dom (m' ˢ)
+      dom∪ˡ≡∪dom = dom∪ˡ⊆∪dom , ∪dom⊆dom∪ˡ
