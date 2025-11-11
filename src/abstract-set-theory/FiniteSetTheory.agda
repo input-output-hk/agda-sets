@@ -150,19 +150,24 @@ indexedSum' f s = indexedSum f (s ᶠˢ)
 syntax indexedSumᵛ' (λ a → x) m = ∑[ a ← m ] x
 syntax indexedSum'  (λ a → x) m = ∑ˢ[ a ← m ] x
 
-module _ ⦃ _ : DecEq A ⦄ ⦃ _ : DecEq B ⦄ ⦃ _ : CommutativeMonoid 0ℓ 0ℓ C ⦄ where
+module _ ⦃ _ : DecEq A ⦄ ⦃ _ : CommutativeMonoid 0ℓ 0ℓ C ⦄ where
 
-  aggregateBy : ⦃ DecEq C ⦄ → Rel A B → A ⇀ C → B ⇀ C
-  aggregateBy R m = mapFromFun (λ b → ∑[ x ← m ∣ dom (R ∣^ʳ ❴ b ❵) ] x) (range R)
+  open CommutativeMonoid it
 
-  indexedSumᵛ'-cong : ∀ {f : B → C} → indexedSumᵛ' f Preserves _≡ᵉ_ on proj₁ ⟶ CommutativeMonoid._≈_ it
-  indexedSumᵛ'-cong {x = x} {y} = indexedSum-cong {A = A × B} {x = (x ˢ) ᶠˢ} {(y ˢ) ᶠˢ}
+  module _ ⦃ _ : DecEq B ⦄ where
+
+    aggregateBy : ⦃ DecEq C ⦄ → Rel A B → A ⇀ C → B ⇀ C
+    aggregateBy R m =
+      mapFromFun (λ b → ∑[ x ← m ∣ dom (R ∣^ʳ ❴ b ❵) ] x) (range R)
+
+    indexedSumᵛ'-cong
+      : ∀ {f : B → C} → indexedSumᵛ' f Preserves _≡ᵉ_ on proj₁ ⟶ _≈_
+    indexedSumᵛ'-cong {x = x} {y} =
+      indexedSum-cong {A = A × B} {x = (x ˢ) ᶠˢ} {(y ˢ) ᶠˢ}
 
   indexedSumᵐ-∪ˡ-∪ˡᶠ
     : ∀ ⦃ _ : DecEq C ⦄ (m : A ⇀ C) (m' : A ⇀ C)
-    → CommutativeMonoid._≈_ it
-        (indexedSumᵐ proj₂ ((m ∪ˡ m') ᶠᵐ))
-        (indexedSumᵐ proj₂ ((m ᶠᵐ) ∪ˡᶠ (m' ᶠᵐ)))
+    → indexedSumᵐ proj₂ ((m ∪ˡ m') ᶠᵐ) ≈ indexedSumᵐ proj₂ ((m ᶠᵐ) ∪ˡᶠ (m' ᶠᵐ))
   indexedSumᵐ-∪ˡ-∪ˡᶠ m m' =
       indexedSumᵐ-cong
         {f = proj₂}
