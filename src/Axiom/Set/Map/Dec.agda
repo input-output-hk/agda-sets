@@ -143,54 +143,52 @@ module Lookupᵐᵈ (sp-∈ : spec-∈ A) where
       dom∪ˡ≡∪dom : dom ((m ∪ˡ m')ˢ) ≡ᵉ dom (m ˢ) ∪ dom (m' ˢ)
       dom∪ˡ≡∪dom = dom∪ˡ⊆∪dom , ∪dom⊆dom∪ˡ
 
-  filterᵐ-singleton-false
-    : {P : A → Type} {k : A} {v : B} (spP : specProperty P)
-    → ¬ P k → filterᵐ (sp-∘ spP proj₁) ❴ k , v ❵ᵐ ≡ᵐ ∅ᵐ
-  filterᵐ-singleton-false {P = P} _ ¬p .proj₁ x =
-    ⊥-elim $ ¬p $
-      subst
-        (P ∘ proj₁)
-        (from ∈-singleton $ proj₂ (from ∈-filter x))
-        (proj₁ $ from ∈-filter x)
-  filterᵐ-singleton-false _ _ .proj₂ = ⊥-elim ∘ ∉-∅
-    where
-      open import Axiom.Set.Properties th using (∉-∅)
+  opaque
+    filterᵐ-singleton-false
+      : {P : A → Type} {k : A} {v : B} (spP : specProperty P)
+      → ¬ P k → filterᵐ (sp-∘ spP proj₁) ❴ k , v ❵ᵐ ≡ᵐ ∅ᵐ
+    filterᵐ-singleton-false {P = P} _ ¬p .proj₁ x =
+      ⊥-elim $ ¬p $
+        subst
+          (P ∘ proj₁)
+          (from ∈-singleton $ proj₂ (from ∈-filter x))
+          (proj₁ $ from ∈-filter x)
+    filterᵐ-singleton-false _ _ .proj₂ = ⊥-elim ∘ ∉-∅
+      where
+        open import Axiom.Set.Properties th using (∉-∅)
 
-  spᵐ : {P : A → Type} → specProperty P → specProperty (P ∘ proj₁ {B = const B})
-  spᵐ spP = sp-∘ spP proj₁
+    add-excluded-∪ˡ-l
+      : {P : A → Type} {k : A} {v : B}
+        ⦃ _ : DecEq A ⦄
+        (spP : specProperty P) (m : Map A B)
+      → ¬ P k
+      → filterᵐ (sp-∘ spP proj₁) (m ∪ˡ ❴ k , v ❵ᵐ) ≡ᵐ filterᵐ (sp-∘ spP proj₁) m
+    add-excluded-∪ˡ-l {B} {k = k} {v = v} spP m ¬p with k ∈? dom (m ˢ)
+    ... | yes k∈m =
+        filterᵐ-cong
+          {m = m ∪ˡ ❴ k , v ❵ᵐ}
+          {m' = m}
+          (singleton-∈-∪ˡ {m = m} k∈m)
+    ... | no k∉m = begin
+        filterᵐ (sp-∘ spP proj₁) (m ∪ˡ ❴ k , v ❵ᵐ) ˢ
+          ≈⟨ filter-cong $ disjoint-∪ˡ-∪ (disjoint-sing k∉m) ⟩
+        filter (sp-∘ spP proj₁) (m ˢ ∪ ❴ k , v ❵)
+          ≈⟨ filter-hom-∪ ⟩
+        filter (sp-∘ spP proj₁) (m ˢ) ∪ filter (sp-∘ spP proj₁) ❴ k , v ❵
+          ≈⟨ ∪-cong ≡ᵉ.refl (filterᵐ-singleton-false spP ¬p) ⟩
+        filter (sp-∘ spP proj₁) (m ˢ) ∪ ∅
+          ≈⟨ ∪-identityʳ (filter (sp-∘ spP proj₁) (m ˢ)) ⟩
+        filter (sp-∘ spP proj₁) (m ˢ)
+        ∎
+      where
+        open import Axiom.Set.Properties th using
+          (≡ᵉ-Setoid; ≡ᵉ-isEquivalence; ∪-cong; ∪-identityʳ; filter-cong ; filter-hom-∪)
+        open import Relation.Binary.Structures using (IsEquivalence)
+        module ≡ᵉ = IsEquivalence (≡ᵉ-isEquivalence {A × B})
+        open import Relation.Binary.Reasoning.Setoid (≡ᵉ-Setoid{Σ A (λ x → B)})
+        open import Axiom.Set.Rel th using (∈-dom-singleton-pair)
 
-  add-excluded-∪ˡ-l
-    : {P : A → Type} {k : A} {v : B}
-      ⦃ _ : DecEq A ⦄
-      (spP : specProperty P) (m : Map A B)
-    → ¬ P k
-    → filterᵐ (sp-∘ spP proj₁) (m ∪ˡ ❴ k , v ❵ᵐ) ≡ᵐ filterᵐ (sp-∘ spP proj₁) m
-  add-excluded-∪ˡ-l {B} {k = k} {v = v} spP m ¬p with k ∈? dom (m ˢ)
-  ... | yes k∈m =
-      filterᵐ-cong
-        {m = m ∪ˡ ❴ k , v ❵ᵐ}
-        {m' = m}
-        (singleton-∈-∪ˡ {m = m} k∈m)
-  ... | no k∉m = begin
-      filterᵐ (sp-∘ spP proj₁) (m ∪ˡ ❴ k , v ❵ᵐ) ˢ
-        ≈⟨ filter-cong $ disjoint-∪ˡ-∪ (disjoint-sing k∉m) ⟩
-      filter (sp-∘ spP proj₁) (m ˢ ∪ ❴ k , v ❵)
-        ≈⟨ filter-hom-∪ ⟩
-      filter (sp-∘ spP proj₁) (m ˢ) ∪ filter (sp-∘ spP proj₁) ❴ k , v ❵
-        ≈⟨ ∪-cong ≡ᵉ.refl (filterᵐ-singleton-false spP ¬p) ⟩
-      filter (sp-∘ spP proj₁) (m ˢ) ∪ ∅
-        ≈⟨ ∪-identityʳ (filter (sp-∘ spP proj₁) (m ˢ)) ⟩
-      filter (sp-∘ spP proj₁) (m ˢ)
-      ∎
-    where
-      open import Axiom.Set.Properties th using
-        (≡ᵉ-Setoid; ≡ᵉ-isEquivalence; ∪-cong; ∪-identityʳ; filter-cong ; filter-hom-∪)
-      open import Relation.Binary.Structures using (IsEquivalence)
-      module ≡ᵉ = IsEquivalence (≡ᵉ-isEquivalence {A × B})
-      open import Relation.Binary.Reasoning.Setoid (≡ᵉ-Setoid{Σ A (λ x → B)})
-      open import Axiom.Set.Rel th using (∈-dom-singleton-pair)
-
-      disjoint-sing
-        : k ∉ dom (m ˢ) → disjoint (dom (m ˢ)) (dom (singleton (k , v)))
-      disjoint-sing k∉m a∈d a∈sing
-        rewrite from ∈-dom-singleton-pair a∈sing = k∉m a∈d
+        disjoint-sing
+          : k ∉ dom (m ˢ) → disjoint (dom (m ˢ)) (dom (singleton (k , v)))
+        disjoint-sing k∉m a∈d a∈sing
+          rewrite from ∈-dom-singleton-pair a∈sing = k∉m a∈d
