@@ -126,7 +126,7 @@ module Intersectionᵐ (sp-∈ : spec-∈ (A × B)) where
   m ∩ᵐ m' = (m ˢ ∩ m' ˢ , ⊆-left-unique ∩-⊆ˡ (proj₂ m))
 
 disj-∪ : (m m' : Map A B) → disjoint (dom (m ˢ)) (dom (m' ˢ)) → Map A B
-disj-∪ m m' disj = m ˢ ∪ m' ˢ , λ h h' → case ∈⇔P h , ∈⇔P h' of λ where
+disj-∪ m m' disj = m ˢ ∪ m' ˢ , λ h h' → case ∈-∪⁻ h , ∈-∪⁻ h' of λ where
   (inj₁ hm  , inj₁ h'm)  → proj₂ m hm h'm
   (inj₂ hm' , inj₁ h'm)  → ⊥-elim $ disj (∈-map⁺'' h'm) (∈-map⁺'' hm')
   (inj₁ hm  , inj₂ h'm') → ⊥-elim $ disj (∈-map⁺'' hm)  (∈-map⁺'' h'm')
