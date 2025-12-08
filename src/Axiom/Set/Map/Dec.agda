@@ -143,6 +143,27 @@ module Lookupᵐᵈ (sp-∈ : spec-∈ A) where
       dom∪ˡ≡∪dom : dom ((m ∪ˡ m')ˢ) ≡ᵉ dom (m ˢ) ∪ dom (m' ˢ)
       dom∪ˡ≡∪dom = dom∪ˡ⊆∪dom , ∪dom⊆dom∪ˡ
 
+      -- If `k ∈ dom m₁ ∪ dom m₂` (for m₁, m₂ maps), then `(k , v) ∈ m₁ ∪⁺ m₂` for some `v`.
+      dom∪-∃∪⁺
+        : {k : A} → k ∈ dom (m ˢ) ∪ dom (m' ˢ) → ∃ (λ • → (k , •) ∈ (m ∪⁺ m') ˢ)
+      dom∪-∃∪⁺ k∈ = from dom∈ (∪dom⊆dom∪⁺ k∈)
+
+      -- If `(k , v) ∈ m₁ ∪⁺ m₂`, then `k ∈ dom m₁ ∪ dom m₂`.
+      ∪⁺-dom∪
+        : {k : A} {v : V} → (k , v) ∈ (m ∪⁺ m') ˢ → k ∈ dom (m ˢ) ∪ dom (m' ˢ)
+      ∪⁺-dom∪ {v = v} kv∈ = dom∪⁺⊆∪dom (to dom∈ (v , kv∈))
+
+    -- The image of a key `k ∈ dom m₁ ∪ dom m₂` under the map `m₁ ∪⁺ m₂` is
+    --  `fold id id _◇_ (unionThese m₁ m₂ k p)`.
+    ∥_∪⁺_∥ : {k : A} (m m' : Map A V) → k ∈ dom (m ˢ) ∪ dom (m' ˢ) → V
+    ∥_∪⁺_∥ {k} m₁ m₂ p = fold id id _◇_ (unionThese m₁ m₂ k p)
+
+    -- F[ m₁ , m₂ ] takes a key `k` and a proof of `k ∈ dom m₁ ∪ dom m₂` and returns
+    -- the pair `(k , v)` where `v` is the unique image of `k` under `m₁ ∪⁺ m₂`.
+    -- i.e., `(k , v) ∈ m₁ ∪⁺ m₂`.
+    F[_,_] : (m m' : Map A V) → ∃ (_∈ dom (m ˢ) ∪ dom (m' ˢ)) → A × V
+    F[ m₁ , m₂ ] (x , x∈) = x , ∥ m₁ ∪⁺ m₂ ∥ x∈
+
   opaque
     filterᵐ-singleton-false
       : {P : A → Type} {k : A} {v : B} (spP : specProperty P)
