@@ -329,6 +329,10 @@ filter-finite {X = X} {P} sp P? (l , hl) = L.filter P? l , λ {a} →
   a ∈ˡ L.filter P? l ∎
   where open R.EquationalReasoning
 
+finite⇒A≡∅⊎∃a∈A : finite X → (X ≡ᵉ ∅) ⊎ ∃[ a ] a ∈ X
+finite⇒A≡∅⊎∃a∈A ([]    , h) = inj₁ (∅-least (λ a∈A → case to h a∈A of λ ()))
+finite⇒A≡∅⊎∃a∈A (x ∷ _ , h) = inj₂ (x , from h (here refl))
+
 ∪-⊆ˡ : X ⊆ X ∪ Y
 ∪-⊆ˡ = ∈⇔P ∘′ inj₁
 
