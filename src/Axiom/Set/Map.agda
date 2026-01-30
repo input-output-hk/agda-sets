@@ -76,6 +76,11 @@ infix 4 _≡ᵐ_
 _≡ᵐ_ : Map A B → Map A B → Type
 (x , _) ≡ᵐ (y , _) = x ≡ᵉ y
 
+infix 4 _≢ᵐ_
+
+_≢ᵐ_ : Map A B → Map A B → Type
+a ≢ᵐ b = ¬ a ≡ᵐ b
+
 private variable m m' : Map A B
 
 _ˢ : Map A B → Rel A B
