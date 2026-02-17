@@ -15,6 +15,7 @@ import Function.Related.Propositional as R
 import Relation.Binary.Lattice.Properties.BoundedJoinSemilattice as Bounded∨Semilattice
 import Relation.Binary.Lattice.Properties.JoinSemilattice as ∨Semilattice
 import Relation.Nullary.Decidable
+open import Data.List.Ext.Properties
 open import Data.List.Ext.Properties using (_×-cong_; _⊎-cong_)
 open import Data.List.Membership.DecPropositional using () renaming (_∈?_ to _∈ˡ?_)
 open import Data.List.Membership.Propositional.Properties using (∈-filter⁺; ∈-filter⁻; ∈-++⁺ˡ; ∈-++⁺ʳ; ∈-++⁻)
@@ -492,3 +493,14 @@ module _ {L : List A} where
   ∃-sublist-⇔ : {P : Pred (List A) ℓ} → (∃[ l ] fromList l ⊆ fromList L × P l) ⇔ (∃[ l ] l ⊆ˡ L × P l)
   ∃-sublist-⇔ = mk⇔ (λ (l , l⊆L , Pl) → l , to sublist-⇔ l⊆L , Pl)
                     (λ (l , l⊆L , Pl) → l , from sublist-⇔ l⊆L , Pl)
+
+  dedup-≡ : ⦃ _ : DecEq A ⦄ → fromList L ≡ᵉ fromList (deduplicate≡ L)
+  dedup-≡ = from ≡ᵉ⇔≡ᵉ' λ a →
+    a ∈ fromList L
+      ∼⟨ R.SK-sym ∈-fromList ⟩
+    a ∈ˡ L
+      ∼⟨ ∈-dedup ⟩
+    a ∈ˡ deduplicate≡ L
+      ∼⟨ ∈-fromList ⟩
+    a ∈ fromList (deduplicate≡ L) ∎
+    where open R.EquationalReasoning
