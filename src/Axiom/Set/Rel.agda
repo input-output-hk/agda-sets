@@ -2,7 +2,7 @@
 {-# OPTIONS -v allTactics:100 #-}
 
 open import abstract-set-theory.Prelude hiding (map)
-open import Axiom.Set using (Theory)
+open import Axiom.Set
 
 module Axiom.Set.Rel (th : Theory) where
 
@@ -41,9 +41,10 @@ private macro
 Rel : Type → Type → Type
 Rel A B = Set (A × B)
 
-private variable A A' B B' C : Type
-                 R R' : Rel A B
-                 X : Set A
+private variable
+  A A' B B' C : Type
+  R R' : Rel A B
+  X : Set A
 
 relatedˡ : Rel A B → Set A
 relatedˡ = map proj₁
@@ -57,28 +58,28 @@ dom = map proj₁
 range : Rel A B → Set B
 range = map proj₂
 
-_⁻¹ʳ : {A B : Type} → Rel A B → Rel B A
+_⁻¹ʳ : Rel A B → Rel B A
 R ⁻¹ʳ = map swap R
   where open import Data.Product using (swap)
 
-⁻¹ʳ-cong : {A B : Type} {R S : Rel A B}
+⁻¹ʳ-cong : {R S : Rel A B}
          → R ≡ᵉ S → R ⁻¹ʳ ≡ᵉ S ⁻¹ʳ
 ⁻¹ʳ-cong = map-≡ᵉ
 
 disjoint-dom⇒disjoint : disjoint (dom R) (dom R') → disjoint R R'
 disjoint-dom⇒disjoint disj = ∈-map⁺'' -⟨ disj ⟩- ∈-map⁺''
 
-_∣'_ : {P : A → Type} → Rel A B → specProperty P → Rel A B
-m ∣' P? = filter (sp-∘ P? proj₁) m
+_∣'_ : {P : A → Type} → Rel A B → specProperty sp P → Rel A B
+m ∣' P? = filter (sp-∘ sp P? proj₁) m
 
-_∣^'_ : {P : B → Type} → Rel A B → specProperty P → Rel A B
-m ∣^' P? = filter (sp-∘ P? proj₂) m
+_∣^'_ : {P : B → Type} → Rel A B → specProperty sp P → Rel A B
+m ∣^' P? = filter (sp-∘ sp P? proj₂) m
 
-impl⇒res⊆ : ∀ {X : Rel A B} {P P'} (sp-P : specProperty P) (sp-P' : specProperty P')
+impl⇒res⊆ : ∀ {X : Rel A B} {P P'} (sp-P : specProperty sp P) (sp-P' : specProperty sp P')
           → (∀ {a} → P a → P' a) → X ∣' sp-P ⊆ X ∣' sp-P'
 impl⇒res⊆ sp-P sp-P' P⇒P' a∈X∣'P = ∈⇔P (×.map₁ P⇒P' (∈⇔P a∈X∣'P))
 
-impl⇒cores⊆ : ∀ {X : Rel A B} {P P'} (sp-P : specProperty P) (sp-P' : specProperty P')
+impl⇒cores⊆ : ∀ {X : Rel A B} {P P'} (sp-P : specProperty sp P) (sp-P' : specProperty sp P')
             → (∀ {b} → P b → P' b) → X ∣^' sp-P ⊆ X ∣^' sp-P'
 impl⇒cores⊆ sp-P sp-P' P⇒P' a∈X∣^'P = ∈⇔P (×.map₁ P⇒P' (∈⇔P a∈X∣^'P))
 
@@ -189,7 +190,7 @@ module Restriction (sp-∈ : spec-∈ A) where
   m ∣ X = m ∣' sp-∈ {X}
 
   _∣_ᶜ : Rel A B → Set A → Rel A B
-  m ∣ X ᶜ = m ∣' sp-¬ (sp-∈ {X})
+  m ∣ X ᶜ = m ∣' sp-¬ sp (sp-∈ {X})
 
   _⟪$⟫_ : Rel A B → Set A → Set B
   m ⟪$⟫ X = range (m ∣ X)
@@ -258,7 +259,7 @@ module Restriction (sp-∈ : spec-∈ A) where
     where open import Relation.Binary using (IsEquivalence)
 
   curryʳ : Rel (A × B) C → A → Rel B C
-  curryʳ R a = mapˡ proj₂ (R ∣' (sp-∘ (sp-∈ {X = ❴ a ❵}) proj₁))
+  curryʳ R a = mapˡ proj₂ (R ∣' (sp-∘ sp (sp-∈ {X = ❴ a ❵}) proj₁))
 
   ∈-curryʳ : ∀ {a} {b : B} {c : C} → (b , c) ∈ curryʳ R a → ((a , b) , c) ∈ R
   ∈-curryʳ h = case ∈⇔P h of λ where
@@ -293,7 +294,7 @@ module Corestriction (sp-∈ : spec-∈ B) where
   m ∣^ X = m ∣^' sp-∈ {X}
 
   _∣^_ᶜ : Rel A B → Set B → Rel A B
-  m ∣^ X ᶜ = m ∣^' sp-¬ (sp-∈ {X})
+  m ∣^ X ᶜ = m ∣^' sp-¬ sp (sp-∈ {X})
 
   cores-⊆ : (R ∣^ X) ⊆ R
   cores-⊆ = proj₂ ∘′ ∈⇔P

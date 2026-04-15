@@ -2,7 +2,7 @@
 
 module Axiom.Set where
 
-open import abstract-set-theory.Prelude hiding (map)
+open import abstract-set-theory.Prelude hiding (map; ⊤)
 
 import Function.Related.Propositional as R
 open import Data.List.Ext.Properties using (∈-dedup; _×-cong_)
@@ -15,11 +15,35 @@ open import Data.Product.Properties.Ext using (∃-cong′; ∃-≡)
 open import Class.DecEq using (DecEq; _≟_)
 open import Relation.Nullary.Decidable using (_×-dec_)
 import Relation.Unary as U
+open import Data.Unit.Polymorphic using (⊤)
+
+data SpecProperty : Type where
+  ⊤-SpecProperty : SpecProperty
+  Dec-SpecProperty : SpecProperty
+
+specProperty : SpecProperty → ∀ {ℓ} {A : Type ℓ} → (A → Type ℓ) → Type ℓ
+specProperty ⊤-SpecProperty   _ = ⊤
+specProperty Dec-SpecProperty = Decidable¹
+
+sp-∘ : (sp : SpecProperty) → ∀ {ℓ} {A B : Type ℓ} {P : A → Type ℓ}
+      → specProperty sp P → (f : B → A) → specProperty sp (P ∘ f)
+sp-∘ ⊤-SpecProperty   p  = const p
+sp-∘ Dec-SpecProperty P? = P? ∘_
+
+sp-¬ : (sp : SpecProperty) → ∀ {ℓ} {A : Type ℓ} {P : A → Type ℓ}
+      → specProperty sp P → specProperty sp (¬_ ∘ P)
+sp-¬ ⊤-SpecProperty   p  = p
+sp-¬ Dec-SpecProperty P? = ¬? ∘ P?
+
+sp-∩ : (sp : SpecProperty) → ∀ {ℓ} {A : Type ℓ} {P Q : A → Type ℓ}
+      → specProperty sp P → specProperty sp Q → specProperty sp (P U.∩ Q)
+sp-∩ ⊤-SpecProperty   p  q    = p
+sp-∩ Dec-SpecProperty P? Q? _ = P? _ ×-dec Q? _
 
 private variable
   ℓ : Level
   A B C : Type ℓ
-  P : A → Type
+  P : A → Type ℓ
   l : List A
 
 _Preserves₁_⟶_ : {A : Type ℓ} → (A → B) → Pred A 0ℓ → Pred B 0ℓ → Type ℓ
@@ -28,36 +52,13 @@ f Preserves₁ P ⟶ Q = ∀ {a} → P a → Q (f a)
 _Preserves₁₂_⟶_⟶_ : {A B : Type ℓ} → (A → B → C) → Pred A ℓ → Pred B ℓ → Pred C ℓ → Type ℓ
 f Preserves₁₂ P ⟶ P' ⟶ Q = ∀ {a b} → P a → P' b → Q (f a b)
 
-record SpecProperty {ℓ} : Type (sucˡ ℓ) where
-  field specProperty : {A : Type ℓ} → (A → Type) → Type
-        sp-∘ : specProperty P → (f : B → A) → specProperty (P ∘ f)
-        sp-¬ : specProperty P → specProperty (¬_ ∘ P)
-        sp-∩ : ∀ {P Q : A → Type} → specProperty P → specProperty Q → specProperty (P U.∩ Q)
-
-⊤-SpecProperty : ∀ {a} → SpecProperty {a}
-⊤-SpecProperty = record
-  { specProperty = λ _ → ⊤
-  ; sp-∘         = λ _ _ → _
-  ; sp-∩         = λ _ _ → _
-  ; sp-¬         = λ _ → _
-  }
-
-Dec-SpecProperty : SpecProperty
-Dec-SpecProperty = record
-  { specProperty = Decidable¹
-  ; sp-∘         = λ P? → P? ∘_
-  ; sp-¬         = λ P? → ¬? ∘ P?
-  ; sp-∩         = λ P? Q? _ → P? _ ×-dec Q? _
-  }
-
 record Theory {ℓ} : Type (sucˡ ℓ) where
   infix 4 _⊆_ _≡ᵉ_ _∈_ _∉_
   infixr 6 _∪_
 
   field Set : Type ℓ → Type ℓ
-        _∈_ : A → Set A → Type
+        _∈_ : A → Set A → Type ℓ
         sp  : SpecProperty
-  open SpecProperty sp public
 
   _⊆_ : Set A → Set A → Type ℓ
   X ⊆ Y = ∀ {a} → a ∈ X → a ∈ Y
@@ -65,13 +66,14 @@ record Theory {ℓ} : Type (sucˡ ℓ) where
   -- we might want to either have all properties or
   -- decidable properties allowed for specification
   field specification : (X : Set A)
-                      → specProperty P → ∃[ Y ] ∀ {a} → (P a × a ∈ X) ⇔ a ∈ Y
+                      → specProperty sp P → ∃[ Y ] ∀ {a : A} → (P a × (a ∈ X)) ⇔ (a ∈ Y)
+
         unions        : (X : Set (Set A))
-                      → ∃[ Y ] ∀ {a} → (∃[ T ] (T ∈ X × a ∈ T)) ⇔ a ∈ Y
+                      → ∃[ Y ] ∀ {a : A} → (∃[ T ] (T ∈ X × a ∈ T)) ⇔ a ∈ Y
         replacement   : (f : A → B) (X : Set A)
-                      → ∃[ Y ] ∀ {b} → (∃[ a ] b ≡ f a × a ∈ X) ⇔ b ∈ Y
+                      → ∃[ Y ] ∀ {b : B} → (∃[ a ] b ≡ f a × a ∈ X) ⇔ b ∈ Y
         listing       : (l : List A)
-                      → ∃[ X ] ∀ {a} → a ∈ˡ l ⇔ a ∈ X
+                      → ∃[ X ] ∀ {a : A} → a ∈ˡ l ⇔ a ∈ X
                       -- ^ equivalent to pairing + empty set
         -- power-set     : (X : Set A) → ∃[ Y ] ∀ {T} → T ⊆ X → T ∈ Y
 
@@ -83,7 +85,7 @@ record Theory {ℓ} : Type (sucˡ ℓ) where
   _≡ᵉ'_ : Set A → Set A → Type ℓ
   X ≡ᵉ' Y = ∀ a → a ∈ X ⇔ a ∈ Y
 
-  _∉_ : A → Set A → Type
+  _∉_ : A → Set A → Type ℓ
   _∉_ = ¬_ ∘₂ _∈_
 
   ≡→∈ : {X : Set A} {a a' : A} → a ∈ X → a ≡ a' → a' ∈ X
@@ -147,7 +149,7 @@ record Theory {ℓ} : Type (sucˡ ℓ) where
 
   -- if you can construct a set that contains all elements satisfying
   -- P, you can construct a set containing exactly the elements satisfying P
-  strictify : specProperty P → (∃[ Y ] ∀ {a} → P a → a ∈ Y) → ∃[ Y ] ∀ {a} → P a ⇔ a ∈ Y
+  strictify : specProperty sp P → (∃[ Y ] ∀ {a} → P a → a ∈ Y) → ∃[ Y ] ∀ {a} → P a ⇔ a ∈ Y
   strictify sp p with specification (proj₁ p) sp
   ... | (Y , p') = Y , (mk⇔ (λ a∈l → to p' (a∈l , proj₂ p a∈l)) (proj₁ ∘ from p'))
 
@@ -164,10 +166,10 @@ record Theory {ℓ} : Type (sucˡ ℓ) where
   -- _⁻¹_ : (A → B) → Set B → Set A
   -- f ⁻¹ X = {!!}
 
-  filter : {P : A → Type} → specProperty P → Set A → Set A
+  filter : {P : A → Type ℓ} → specProperty sp P → Set A → Set A
   filter = proj₁ ∘₂ flip specification
 
-  ∈-filter : ∀ {sp-P : specProperty P} {a} → (P a × a ∈ X) ⇔ a ∈ filter sp-P X
+  ∈-filter : ∀ {sp-P : specProperty sp P} {a} → (P a × a ∈ X) ⇔ a ∈ filter sp-P X
   ∈-filter = proj₂ $ specification _ _
 
   fromList : List A → Set A
@@ -265,7 +267,7 @@ record Theory {ℓ} : Type (sucˡ ℓ) where
   ∈-∪ = proj₂ binary-unions
 
   spec-∈ : Type ℓ → Type ℓ
-  spec-∈ A = {X : Set A} → specProperty (_∈ X)
+  spec-∈ A = {X : Set A} → specProperty sp (_∈ X)
 
   -- membership needs to be a specProperty to have intersections
   module Intersection (sp-∈ : spec-∈ A) where
@@ -284,7 +286,7 @@ record Theory {ℓ} : Type (sucˡ ℓ) where
     disjoint' X Y = X ∩ Y ≡ᵉ ∅
 
     _＼_ : Set A → Set A → Set A
-    X ＼ Y = filter (sp-¬ (sp-∈ {Y})) X
+    X ＼ Y = filter (sp-¬ sp (sp-∈ {Y})) X
 
   All : (A → Type) → Set A → Type ℓ
   All P X = ∀ {a} → a ∈ X → P a

@@ -2,7 +2,7 @@
 {-# OPTIONS -v allTactics:100 #-}
 
 open import abstract-set-theory.Prelude
-open import Axiom.Set using (Theory)
+open import Axiom.Set using (Theory; specProperty; sp-∘; sp-¬)
 
 module Axiom.Set.Map (th : Theory) where
 
@@ -144,10 +144,10 @@ disj-∪-cong : {m m' m'' m''' : Map A B}
               → disj-∪ m m' m∩m'≡∅ ≡ᵐ disj-∪ m'' m''' m''∩m'''≡∅
 disj-∪-cong m≡m' m''≡m''' = ∪-cong m≡m' m''≡m'''
 
-filterᵐ : {P : Pred (A × B) 0ℓ} → specProperty P → Map A B → Map A B
+filterᵐ : {P : A × B → Type} → specProperty sp P → Map A B → Map A B
 filterᵐ sp-P m = filter sp-P (m ˢ) , ⊆-left-unique filter-⊆ (proj₂ m)
 
-module _ {P : Pred (A × B) 0ℓ} {spP : specProperty P} where
+module _ {P : A × B → Type} {spP : specProperty sp P} where
   filterᵐ-idem : ∀ {m : Map A B} → filterᵐ spP (filterᵐ spP m) ≡ᵐ filterᵐ spP m
   filterᵐ-idem = filter-idem
 
@@ -163,12 +163,12 @@ module _ {P : Pred (A × B) 0ℓ} {spP : specProperty P} where
       filterᵐspPm⊇filterᵐspPm' p with from ∈-filter p
       ... | (q , p) = to ∈-filter (q , proj₂ m≡m' p)
 
-filterᵐ-finite : {P : A × B → Type} → (sp : specProperty P) → Decidable P
+filterᵐ-finite : {P : A × B → Type} → (sp : specProperty sp P) → Decidable P
   → finite (m ˢ) → finite (filterᵐ sp m ˢ)
 filterᵐ-finite = filter-finite
 
-filterKeys : {P : A → Type} → specProperty P → Map A B → Map A B
-filterKeys sp-P = filterᵐ (sp-∘ sp-P proj₁)
+filterKeys : {P : A → Type} → specProperty sp P → Map A B → Map A B
+filterKeys sp-P = filterᵐ (sp-∘ sp sp-P proj₁)
 
 singletonᵐ : A → B → Map A B
 singletonᵐ a b = ❴ (a , b) ❵
@@ -222,28 +222,28 @@ module Unionᵐ (sp-∈ : spec-∈ A) where
   infixr 6 _∪ˡ_
 
   _∪ˡ'_ : Rel A B → Rel A B → Rel A B
-  m ∪ˡ' m' = m ∪ filter (sp-∘ (sp-¬ (sp-∈ {dom m})) proj₁) m'
+  m ∪ˡ' m' = m ∪ filter (sp-∘ sp (sp-¬ sp (sp-∈ {dom m})) proj₁) m'
 
   private
      disjoint-proof : ∀ (m m' : Map A B)
-                    → disjoint (dom (m ˢ)) (dom (filterᵐ (sp-∘ (sp-¬ (sp-∈ {dom (m ˢ)})) (λ r → proj₁ r)) m' ˢ))
+                    → disjoint (dom (m ˢ)) (dom (filterᵐ (sp-∘ sp (sp-¬ sp (sp-∈ {dom (m ˢ)})) (λ r → proj₁ r)) m' ˢ))
      disjoint-proof m m' p q with from ∈-map q
      ... | _ , refl , q with from ∈-filter q
      ... | q , _ = q p
 
   _∪ˡ_ : Map A B → Map A B → Map A B
-  m ∪ˡ m' = disj-∪ m (filterᵐ (sp-∘ (sp-¬ sp-∈) proj₁) m') (disjoint-proof m m')
+  m ∪ˡ m' = disj-∪ m (filterᵐ (sp-∘ sp (sp-¬ sp sp-∈) proj₁) m') (disjoint-proof m m')
 
   ∪ˡ-cong : ∀ {m m' m'' m''' : Map A B} → m ≡ᵐ m'' → m' ≡ᵐ m''' → (m ∪ˡ m') ≡ᵐ (m'' ∪ˡ m''')
   ∪ˡ-cong {m = m} {m' = m'} {m'' = m''} {m''' = m'''} m≡m'' m'≡m'''
-    = disj-∪-cong {m = m} {m' = (filterᵐ (sp-∘ (sp-¬ sp-∈) proj₁) m')} {m'' = m''} {m''' = (filterᵐ (sp-∘ (sp-¬ sp-∈) proj₁) m''')}
+    = disj-∪-cong {m = m} {m' = (filterᵐ (sp-∘ sp (sp-¬ sp sp-∈) proj₁) m')} {m'' = m''} {m''' = (filterᵐ (sp-∘ sp (sp-¬ sp sp-∈) proj₁) m''')}
                   {m∩m'≡∅ = disjoint-proof m m'} {m''∩m'''≡∅ = disjoint-proof m'' m'''} m≡m'' (⊆ , ⊇)
     where
-      ⊇ : filterᵐ (sp-∘ (sp-¬ sp-∈) proj₁) m''' ˢ ⊆ filterᵐ (sp-∘ (sp-¬ sp-∈) proj₁) m' ˢ
+      ⊇ : filterᵐ (sp-∘ sp (sp-¬ sp sp-∈) proj₁) m''' ˢ ⊆ filterᵐ (sp-∘ sp (sp-¬ sp sp-∈) proj₁) m' ˢ
       ⊇ p with from ∈-filter p
       ... | p , q = to ∈-filter ((λ x → p (dom-cong m≡m'' .proj₁ x)) , m'≡m''' .proj₂ q)
 
-      ⊆ : filterᵐ (sp-∘ (sp-¬ sp-∈) proj₁) m' ˢ ⊆ filterᵐ (sp-∘ (sp-¬ sp-∈) proj₁) m''' ˢ
+      ⊆ : filterᵐ (sp-∘ sp (sp-¬ sp sp-∈) proj₁) m' ˢ ⊆ filterᵐ (sp-∘ sp (sp-¬ sp sp-∈) proj₁) m''' ˢ
       ⊆ p with from ∈-filter p
       ... | p , q = to ∈-filter ((λ x → p (dom-cong m≡m'' .proj₂ x)) , m'≡m''' .proj₁ q)
 
@@ -324,11 +324,11 @@ mapWithKey f m@(r , p) = mapˢ (λ { (x , y) → x , f x y}) r , mapWithKey-uniq
 mapValues-dom : {f : B → C} → dom (m ˢ) ≡ᵉ dom (mapValues f m ˢ)
 mapValues-dom {m = _ , _} = mapʳ-dom
 
-_∣'_ : {P : A → Type} → Map A B → specProperty P → Map A B
-m ∣' P? = filterᵐ (sp-∘ P? proj₁) m
+_∣'_ : {P : A → Type} → Map A B → specProperty sp P → Map A B
+m ∣' P? = filterᵐ (sp-∘ sp P? proj₁) m
 
-_∣^'_ : {P : B → Type} → Map A B → specProperty P → Map A B
-m ∣^' P? = filterᵐ (sp-∘ P? proj₂) m
+_∣^'_ : {P : B → Type} → Map A B → specProperty sp P → Map A B
+m ∣^' P? = filterᵐ (sp-∘ sp P? proj₂) m
 
 constMap : Set A → B → Map A B
 constMap X b = mapˢ (_, b) X , λ x x₁ →

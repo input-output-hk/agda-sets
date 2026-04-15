@@ -1,5 +1,5 @@
 {-# OPTIONS --safe --no-import-sorts #-}
-open import Axiom.Set using (Theoryᵈ; Theory)
+open import Axiom.Set using (Theoryᵈ; Theory; specProperty; sp-∘; sp-¬)
 
 module Axiom.Set.Map.Dec (thᵈ : Theoryᵈ) where
 
@@ -95,7 +95,7 @@ module Lookupᵐᵈ (sp-∈ : spec-∈ A) where
 
       private
         rhs-∪ˡ : Rel A V
-        rhs-∪ˡ = (filterᵐ (sp-∘ (sp-¬ (sp-∈ {X = dom (m ˢ)})) proj₁) m') ˢ
+        rhs-∪ˡ = (filterᵐ (sp-∘ sp (sp-¬ sp (sp-∈ {X = dom (m ˢ)})) proj₁) m') ˢ
 
       dom∪ˡˡ : dom (m ˢ) ⊆ dom ((m ∪ˡ m') ˢ)
       dom∪ˡˡ {a} a∈ = a∈ ∶
@@ -166,8 +166,8 @@ module Lookupᵐᵈ (sp-∈ : spec-∈ A) where
 
   opaque
     filterᵐ-singleton-false
-      : {P : A → Type} {k : A} {v : B} (spP : specProperty P)
-      → ¬ P k → filterᵐ (sp-∘ spP proj₁) ❴ k , v ❵ᵐ ≡ᵐ ∅ᵐ
+      : {P : A → Type} {k : A} {v : B} (spP : specProperty sp P)
+      → ¬ P k → filterᵐ (sp-∘ sp spP proj₁) ❴ k , v ❵ᵐ ≡ᵐ ∅ᵐ
     filterᵐ-singleton-false {P = P} _ ¬p .proj₁ x =
       ⊥-elim $ ¬p $
         subst
@@ -181,9 +181,9 @@ module Lookupᵐᵈ (sp-∈ : spec-∈ A) where
     add-excluded-∪ˡ-l
       : {P : A → Type} {k : A} {v : B}
         ⦃ _ : DecEq A ⦄
-        (spP : specProperty P) (m : Map A B)
+        (spP : specProperty sp P) (m : Map A B)
       → ¬ P k
-      → filterᵐ (sp-∘ spP proj₁) (m ∪ˡ ❴ k , v ❵ᵐ) ≡ᵐ filterᵐ (sp-∘ spP proj₁) m
+      → filterᵐ (sp-∘ sp spP proj₁) (m ∪ˡ ❴ k , v ❵ᵐ) ≡ᵐ filterᵐ (sp-∘ sp spP proj₁) m
     add-excluded-∪ˡ-l {B} {k = k} {v = v} spP m ¬p with k ∈? dom (m ˢ)
     ... | yes k∈m =
         filterᵐ-cong
@@ -191,15 +191,15 @@ module Lookupᵐᵈ (sp-∈ : spec-∈ A) where
           {m' = m}
           (singleton-∈-∪ˡ {m = m} k∈m)
     ... | no k∉m = begin
-        filterᵐ (sp-∘ spP proj₁) (m ∪ˡ ❴ k , v ❵ᵐ) ˢ
+        filterᵐ (sp-∘ sp spP proj₁) (m ∪ˡ ❴ k , v ❵ᵐ) ˢ
           ≈⟨ filter-cong $ disjoint-∪ˡ-∪ (disjoint-sing k∉m) ⟩
-        filter (sp-∘ spP proj₁) (m ˢ ∪ ❴ k , v ❵)
+        filter (sp-∘ sp spP proj₁) (m ˢ ∪ ❴ k , v ❵)
           ≈⟨ filter-hom-∪ ⟩
-        filter (sp-∘ spP proj₁) (m ˢ) ∪ filter (sp-∘ spP proj₁) ❴ k , v ❵
+        filter (sp-∘ sp spP proj₁) (m ˢ) ∪ filter (sp-∘ sp spP proj₁) ❴ k , v ❵
           ≈⟨ ∪-cong ≡ᵉ.refl (filterᵐ-singleton-false spP ¬p) ⟩
-        filter (sp-∘ spP proj₁) (m ˢ) ∪ ∅
-          ≈⟨ ∪-identityʳ (filter (sp-∘ spP proj₁) (m ˢ)) ⟩
-        filter (sp-∘ spP proj₁) (m ˢ)
+        filter (sp-∘ sp spP proj₁) (m ˢ) ∪ ∅
+          ≈⟨ ∪-identityʳ (filter (sp-∘ sp spP proj₁) (m ˢ)) ⟩
+        filter (sp-∘ sp spP proj₁) (m ˢ)
         ∎
       where
         open import Axiom.Set.Properties th using

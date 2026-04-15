@@ -1,6 +1,6 @@
 {-# OPTIONS --safe --no-import-sorts #-}
 
-open import Axiom.Set using (Theory)
+open import Axiom.Set using (Theory; specProperty; sp-∩; sp-∘)
 
 module Axiom.Set.Properties {ℓ} (th : Theory {ℓ}) where
 
@@ -46,7 +46,7 @@ module _ {f : A → B} {X} {b} where
 ∈-map⁺'' : ∀ {f : A → B} {X} {a} → a ∈ X → f a ∈ map f X
 ∈-map⁺'' h = to ∈-map (-, refl , h)
 
-module _ {X : Set A} {P : A → Type} {sp-P : specProperty P} {a} where
+module _ {X : Set A} {P : A → Type ℓ} {sp-P : specProperty sp P} {a} where
   ∈-filter⁻' : a ∈ filter sp-P X → (P a × a ∈ X)
   ∈-filter⁻' = from ∈-filter
 
@@ -222,37 +222,37 @@ singleton-≢-∅ {A = A} {a = a} X≡∅ =
     of λ ()
   where open IsEquivalence (≡ᵉ-isEquivalence {A}) renaming (refl to ≡ᵉ-refl)
 
-module _ {P Q : A → Type} {sp-P : specProperty P} {sp-Q : specProperty Q} where
+module _ {P Q : A → Type ℓ} {sp-P : specProperty sp P} {sp-Q : specProperty sp Q} where
 
-  filter-∩ : filter sp-P (filter sp-Q X) ≡ᵉ filter (sp-∩ sp-P sp-Q) X
+  filter-∩ : filter sp-P (filter sp-Q X) ≡ᵉ filter (sp-∩ sp sp-P sp-Q) X
   filter-∩ = filter-∩-⊆ , filter-∩-⊇
     where
-      filter-∩-⊆ : filter sp-P (filter sp-Q X) ⊆ filter (sp-∩ sp-P sp-Q) X
+      filter-∩-⊆ : filter sp-P (filter sp-Q X) ⊆ filter (sp-∩ sp sp-P sp-Q) X
       filter-∩-⊆ p with from ∈-filter p
       ... | (Pa , p) with from ∈-filter p
       ... | (Qa , p) = to ∈-filter ((Pa , Qa) , p)
 
-      filter-∩-⊇ : filter (sp-∩ sp-P sp-Q) X ⊆ filter sp-P (filter sp-Q X)
+      filter-∩-⊇ : filter (sp-∩ sp sp-P sp-Q) X ⊆ filter sp-P (filter sp-Q X)
       filter-∩-⊇ p with from ∈-filter p
       ... | ((Pa , Qa) , p) = to ∈-filter (Pa , (to ∈-filter (Qa , p)))
 
-module _ {P : A → Type} {sp-P : specProperty P} {Q : B → Type} {sp-Q : specProperty Q} where
+module _ {P : A → Type ℓ} {sp-P : specProperty sp P} {Q : B → Type ℓ} {sp-Q : specProperty sp Q} where
 
   module _ {f : B → A} where
-    filter-map : filter sp-P (map f X) ≡ᵉ map f (filter (sp-∘ sp-P f) X)
+    filter-map : filter sp-P (map f X) ≡ᵉ map f (filter (sp-∘ sp sp-P f) X)
     filter-map = filter-map-⊆ , filter-map-⊇
       where
-        filter-map-⊆ : filter sp-P (map f X) ⊆ map f (filter (sp-∘ sp-P f) X)
+        filter-map-⊆ : filter sp-P (map f X) ⊆ map f (filter (sp-∘ sp sp-P f) X)
         filter-map-⊆ p with from ∈-filter p
         ... | Pa , p with from ∈-map p
         ... | (a , refl , p) = to ∈-map (a , (refl , (to ∈-filter (Pa , p))))
 
-        filter-map-⊇ : map f (filter (sp-∘ sp-P f) X) ⊆ filter sp-P (map f X)
+        filter-map-⊇ : map f (filter (sp-∘ sp sp-P f) X) ⊆ filter sp-P (map f X)
         filter-map-⊇ p with from ∈-map p
         ... | (a , refl , p) with from ∈-filter p
         ... | (Pfa , p) = to ∈-filter (Pfa , (to ∈-map (a , refl , p)))
 
-module _ {P Q : A → Type} {sp-P : specProperty P} {sp-Q : specProperty Q} where
+module _ {P Q : A → Type ℓ} {sp-P : specProperty sp P} {sp-Q : specProperty sp Q} where
 
   import Relation.Unary as U
 
@@ -260,7 +260,7 @@ module _ {P Q : A → Type} {sp-P : specProperty P} {sp-Q : specProperty Q} wher
   filter-⇒-⊆ P⇒Q p with from ∈-filter p
   ... | (Pa , p) = to ∈-filter ((P⇒Q _ Pa) , p)
 
-module _ {P : A → Type} {sp-P : specProperty P} where
+module _ {P : A → Type ℓ} {sp-P : specProperty sp P} where
 
   filter-∅ : (∀ a → a ∈ X → ¬ P a) → filter sp-P X ≡ᵉ ∅
   proj₁ (filter-∅ h) {a} h' with from ∈-filter h'
@@ -282,7 +282,7 @@ module _ {P : A → Type} {sp-P : specProperty P} where
     begin
      filter sp-P (filter sp-P X)
        ≈⟨ filter-∩ ⟩
-     filter (sp-∩ sp-P sp-P) X
+     filter (sp-∩ sp sp-P sp-P) X
        ≈⟨ filter-⇒-⊆ (λ _ Pa×Pa → Pa×Pa .proj₁) , filter-⇒-⊆ (λ _ Pa → Pa , Pa) ⟩
      filter sp-P X
     ∎
@@ -320,8 +320,8 @@ singleton-finite {a = a} = [ a ] , λ {x} →
   x ∈ˡ [ a ] ∎
   where open R.EquationalReasoning
 
-filter-finite : ∀ {P : A → Type}
-              → (sp : specProperty P) → Decidable¹ P → finite X → finite (filter sp X)
+filter-finite : ∀ {P : A → Type ℓ}
+              → (sp : specProperty sp P) → Decidable¹ P → finite X → finite (filter sp X)
 filter-finite {X = X} {P} sp P? (l , hl) = L.filter P? l , λ {a} →
   a ∈ filter sp X            ∼⟨ R.SK-sym ∈-filter ⟩
   (P a × a ∈ X)              ∼⟨ R.K-refl ×-cong hl ⟩

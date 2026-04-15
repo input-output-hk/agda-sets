@@ -1,6 +1,6 @@
 {-# OPTIONS --safe --no-import-sorts #-}
 
-open import Axiom.Set using (Theory)
+open import Axiom.Set using (Theory; sp-∘; sp-¬)
 
 open import abstract-set-theory.Prelude hiding (ε)
 
@@ -131,7 +131,7 @@ module IndexedSumUnionᵐ ⦃ _ : DecEq A ⦄ ⦃ _ : DecEq B ⦄
 
   ∪ˡ-finite : {R R' : Rel A B} → finite R → finite R' → finite (R ∪ˡ' R')
   ∪ˡ-finite Rᶠ R'ᶠ = ∪-preserves-finite Rᶠ
-                    $ filter-finite (sp-∘ (sp-¬ sp-∈) _) (¬? ∘ ∈-A-dec ∘ _) R'ᶠ
+                    $ filter-finite (sp-∘ sp (sp-¬ sp sp-∈) _) (¬? ∘ ∈-A-dec ∘ _) R'ᶠ
 
   _∪ˡᶠ_ : FinMap A B → FinMap A B → FinMap A B
   (_ , hX , Xᶠ) ∪ˡᶠ (_ , hY , Yᶠ) =

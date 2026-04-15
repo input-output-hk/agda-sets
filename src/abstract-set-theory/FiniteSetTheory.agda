@@ -71,7 +71,7 @@ module Properties where
 opaque
   unfolding List-Model
 
-  to-sp : {A : Type} (P : A → Type) → ⦃ P ⁇¹ ⦄ → specProperty P
+  to-sp : {A : Type} (P : A → Type) → ⦃ P ⁇¹ ⦄ → specProperty (Theory.sp th) P
   to-sp _ = dec¹
 
   finiteness : ∀ (X : Theory.Set th A) → finite X

@@ -32,7 +32,7 @@ List-Model = λ where
     (λ where (T , T∈X , a∈T) → ∈-concat⁺′ a∈T T∈X)
     (λ a∈cX → case ∈-concat⁻′ _ a∈cX of λ where (T , a∈T , T∈X) → (T , T∈X , a∈T))
   .replacement   → λ f X → L.map f X , λ {b} →
-    (∃[ a ] b ≡ f a × a ∈ˡ X) ∼⟨ ∃-cong′ (I.↔⇒⇔ (×-comm _ _)) ⟩
+    (∃[ a ] b ≡ f a × a ∈ˡ X) ∼⟨ ∃-cong′ (I.↔⇒⇔ (×-comm {a = zeroˡ} _ _)) ⟩
     (∃[ a ] a ∈ˡ X × b ≡ f a) ⤖⟨ I.↔⇒⤖ (map-∈↔ f) ⟩
     b ∈ˡ L.map f X    ∎
   .listing → λ l → l , mk⇔ id id
