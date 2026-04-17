@@ -1,9 +1,9 @@
 {-# OPTIONS --safe --no-import-sorts #-}
 
 open import abstract-set-theory.Prelude
-open import Axiom.Set
+open import Axiom.Set using (Theory)
 
-module Axiom.Set.Factor (th : Theory) where
+module Axiom.Set.Factor {ℓ} {ℓ_c} (th : Theory {ℓ} {ℓ_c}) where
 
 open Theory th
 open import Axiom.Set.Properties th
@@ -20,16 +20,16 @@ open import Relation.Binary
 
 open Equivalence
 
-private variable A B : Type
+private variable A B : Type ℓ
 
-_ᶠ : (X : Set A) → ⦃ finite X ⦄ → FinSet A
+_ᶠ : ⦃ _ : Cs A ⦄ → (X : Set A) → ⦃ finite X ⦄ → FinSet A
 _ᶠ X ⦃ Xᶠ ⦄ = X , Xᶠ
 
 instance
-  ∪-preserves-finite' : {X Y : Set A} → ⦃ finite X ⦄ → ⦃ finite Y ⦄ → finite (X ∪ Y)
-  ∪-preserves-finite' ⦃ Xᶠ ⦄ ⦃ Yᶠ ⦄ = ∪-preserves-finite Xᶠ Yᶠ
+  ∪-preserves-finite' : ⦃ _ : Cs A ⦄ → {X Y : Set A} → ⦃ finite X ⦄ → ⦃ finite Y ⦄ → finite (X ∪ Y)
+  ∪-preserves-finite' ⦃ _ ⦄ ⦃ Xᶠ ⦄ ⦃ Yᶠ ⦄ = ∪-preserves-finite Xᶠ Yᶠ
 
-module Factor (_≈_ : B → B → Type) (f : List A → B) (f-cong : ∀ {l l'} → l ∼[ set ] l' → f l ≈ f l') where
+module Factor ⦃ _ : Cs A ⦄ (_≈_ : B → B → Type) (f : List A → B) (f-cong : ∀ {l l'} → l ∼[ set ] l' → f l ≈ f l') where
 
   factor : FinSet A → B
   factor (_ , l , _) = f l
@@ -45,7 +45,7 @@ module Factor (_≈_ : B → B → Type) (f : List A → B) (f-cong : ∀ {l l'}
            → R (factor (X ᶠ)) (factor (Y ᶠ)) (factor ((X ∪ Y) ᶠ))
   factor-∪ hR = hR
 
-module FactorUnique ⦃ _ : DecEq A ⦄ (_≈_ : B → B → Type) (f : (Σ (List A) Unique) → B)
+module FactorUnique ⦃ _ : Cs A ⦄ ⦃ _ : DecEq A ⦄ (_≈_ : B → B → Type) (f : (Σ (List A) Unique) → B)
                     (f-cong : ∀ {l l'} → proj₁ l ↭ proj₁ l' → f l ≈ f l') where
 
   f-cong' : ∀ {l l'} → (∀ {a} → a ∈ˡ proj₁ l ⇔ a ∈ˡ proj₁ l') → f l ≈ f l'

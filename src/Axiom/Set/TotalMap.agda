@@ -2,7 +2,7 @@
 
 open import Axiom.Set using (Theory)
 
-module Axiom.Set.TotalMap (th : Theory) where
+module Axiom.Set.TotalMap {ℓ} {ℓ_c} (th : Theory {ℓ} {ℓ_c}) where
 
 open import abstract-set-theory.Prelude hiding (lookup; map)
 
@@ -13,13 +13,13 @@ open import Axiom.Set.Rel th            using (Rel ; dom ; dom∈)
 open Theory th
 open Equivalence
 
-private variable A B : Type
+private variable A B : Type ℓ
 
 -- defines a total map for a given set
-total : Rel A B → Type
+total : ⦃ _ : Cs A ⦄ → ⦃ _ : Cs B ⦄ → Rel A B → Type ℓ
 total R = ∀ {a} → a ∈ dom R
 
-record TotalMap (A B : Type) : Type where
+record TotalMap (A B : Type ℓ) ⦃ _ : Cs A ⦄ ⦃ _ : Cs B ⦄ : Type ℓ where
   field rel             : Set (A × B)
         left-unique-rel : left-unique rel
         total-rel       : total rel
@@ -40,7 +40,7 @@ record TotalMap (A B : Type) : Type where
 
 open TotalMap
 
-module Update ⦃ _ : DecEq A ⦄ where
+module Update ⦃ _ : Cs A ⦄ ⦃ _ : Cs B ⦄ ⦃ _ : DecEq A ⦄ where
 
   private
     updateFn : A × B → A → B → B
@@ -53,7 +53,7 @@ module Update ⦃ _ : DecEq A ⦄ where
   ... | yes _ = refl
   ... | no ¬p = ⊥-elim (¬p refl)
 
-  mapWithKey : {B' : Type} → (A → B → B') → TotalMap A B → TotalMap A B'
+  mapWithKey : {B' : Type ℓ} ⦃ _ : Cs B' ⦄ → (A → B → B') → TotalMap A B → TotalMap A B'
   mapWithKey f tm .rel              = map (λ{(x , y) → x , f x y}) (rel tm)
   mapWithKey _ tm .left-unique-rel  = mapWithKey-uniq (left-unique-rel tm)
   mapWithKey _ tm .total-rel        = ∈-map′ (∈-map′ (proj₂ (from dom∈ (total-rel tm))))
@@ -62,7 +62,8 @@ module Update ⦃ _ : DecEq A ⦄ where
   update a b = mapWithKey (updateFn (a , b))
 
 
-module LookupUpdate {X : Set A} {a : A} {b : B} {a∈X : a ∈ X} ⦃ _ : DecEq A ⦄ where
+module LookupUpdate ⦃ _ : Cs A ⦄ ⦃ _ : Cs B ⦄
+  {X : Set A} {a : A} {b : B} {a∈X : a ∈ X} ⦃ _ : DecEq A ⦄ where
 
   open Update
 
@@ -77,7 +78,8 @@ module LookupUpdate {X : Set A} {a : A} {b : B} {a∈X : a ∈ X} ⦃ _ : DecEq 
 ------------------------------------------------------
 -- Correspondences between total maps and functions --
 
-module FunTot (X : Set A) (⋁A≡X : isMaximal X) where
+module FunTot ⦃ _ : Cs A ⦄ ⦃ _ : Cs B ⦄
+  (X : Set A) (⋁A≡X : isMaximal X) where
 
   Fun⇒Map : ∀ {f : A → B} (X : Set A) → Map A B
   Fun⇒Map {f = f} X = map (λ x → (x , f x)) X , left-unique-mapˢ X

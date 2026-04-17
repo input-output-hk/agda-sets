@@ -1,7 +1,7 @@
 {-# OPTIONS --safe --no-import-sorts #-}
 open import Axiom.Set using (Theoryᵈ; Theory)
 
-module Axiom.Set.Map.Dec (thᵈ : Theoryᵈ) where
+module Axiom.Set.Map.Dec {ℓ_c} (thᵈ : Theoryᵈ {ℓ_c}) where
 
 open import abstract-set-theory.Prelude hiding (map; Monoid)
 
@@ -19,11 +19,13 @@ open Equivalence
 
 private variable A B C D : Type
 
-module Lookupᵐᵈ (sp-∈ : spec-∈ A) where
-  open Lookupᵐ sp-∈
+module Lookupᵐᵈ ⦃ _ : Cs A ⦄ (sp-∈ : spec-∈ A) where
+  private module L {B} ⦃ _ : Cs B ⦄ = Lookupᵐ {B = B} sp-∈
+  open L public
   open Unionᵐ sp-∈
 
-  unionThese : ⦃ DecEq A ⦄ → (m : Map A B) (m' : Map A C) (x : A)
+  unionThese : ⦃ _ : Cs B ⦄ → ⦃ _ : Cs C ⦄
+    → ⦃ DecEq A ⦄ → (m : Map A B) (m' : Map A C) (x : A)
     → x ∈ dom (m ˢ) ∪ dom (m' ˢ) → These B C
   unionThese m m' x dp with x ∈? dom (m ˢ) | x ∈? dom (m' ˢ)
   ... | yes mr | yes mr' = these (lookupᵐ m x) (lookupᵐ m' x)
@@ -32,7 +34,9 @@ module Lookupᵐᵈ (sp-∈ : spec-∈ A) where
   ... | no  mr | no  mr' = Sum.[ flip contradiction mr , flip contradiction mr' ]
                                (from ∈-∪ dp)
 
-  unionWith : ⦃ DecEq A ⦄ → (These B C → D) → Map A B → Map A C → Map A D
+  unionWith : ⦃ _ : Cs B ⦄ → ⦃ _ : Cs C ⦄ → ⦃ _ : Cs D ⦄
+    → ⦃ DecEq A ⦄ → ⦃ ∀ {X : Set A} → Cs (∃[ a ] a ∈ X) ⦄
+    → (These B C → D) → Map A B → Map A C → Map A D
   unionWith f m@(r , p) m'@(r' , p') = m'' , helper
      where
        d = dom r ∪ dom r'
@@ -50,13 +54,15 @@ module Lookupᵐᵈ (sp-∈ : spec-∈ A) where
          with refl ← trans (sym eq) eq' = refl
 
   intersectionWith
-    : (B → C → D)
+    : ⦃ _ : Cs B ⦄ → ⦃ _ : Cs C ⦄ → ⦃ _ : Cs D ⦄
+    → (B → C → D)
     → (m : Map A B) ⦃ _ : ∀ {x} → (x ∈ dom (m ˢ)) ⁇ ⦄
     → Map A C
     → Map A D
   intersectionWith f m = mapMaybeWithKeyᵐ (λ a c → flip f c <$> lookupᵐ? m a)
 
-  module _ {V : Type} ⦃ mon : CommutativeMonoid 0ℓ 0ℓ V ⦄ ⦃ _ : DecEq A ⦄ where
+  module _ {V : Type} ⦃ _ : Cs V ⦄ ⦃ mon : CommutativeMonoid 0ℓ 0ℓ V ⦄
+           ⦃ _ : DecEq A ⦄ ⦃ _ : ∀ {X : Set A} → Cs (∃[ a ] a ∈ X) ⦄ where
     infixr 6 _∪⁺_
     open CommutativeMonoid mon
 
@@ -75,8 +81,8 @@ module Lookupᵐᵈ (sp-∈ : spec-∈ A) where
                                   (sym $ proj₁ (×-≡,≡←≡ $ proj₁ (proj₂ ∈-dom∪⁺)))
                                   (proj₂ $ proj₁ ∈-dom∪⁺)
         where
-        ∈-dom∪⁺ : ∃[ c ] (a , proj₁ (from dom∈ a∈)) ≡ ∪dom-lookup c
-                          × c ∈ incl-set (dom (m ˢ) ∪ dom (m' ˢ))
+        ∈-dom∪⁺ : ∃[ c ] ((a , proj₁ (from dom∈ a∈)) ≡ ∪dom-lookup c
+                          × c ∈ incl-set (dom (m ˢ) ∪ dom (m' ˢ)))
         ∈-dom∪⁺ = from ∈-map $ proj₂ $ from dom∈ a∈
 
       ∪dom⊆dom∪⁺ : dom (m ˢ) ∪ dom (m' ˢ) ⊆ dom ((m ∪⁺ m') ˢ)
@@ -166,7 +172,8 @@ module Lookupᵐᵈ (sp-∈ : spec-∈ A) where
 
   opaque
     filterᵐ-singleton-false
-      : {P : A → Type} {k : A} {v : B} (spP : specProperty P)
+      : ⦃ _ : Cs B ⦄
+      → {P : A → Type} {k : A} {v : B} (spP : specProperty P)
       → ¬ P k → filterᵐ (sp-∘ spP proj₁) ❴ k , v ❵ᵐ ≡ᵐ ∅ᵐ
     filterᵐ-singleton-false {P = P} _ ¬p .proj₁ x =
       ⊥-elim $ ¬p $
@@ -179,7 +186,8 @@ module Lookupᵐᵈ (sp-∈ : spec-∈ A) where
         open import Axiom.Set.Properties th using (∉-∅)
 
     add-excluded-∪ˡ-l
-      : {P : A → Type} {k : A} {v : B}
+      : ⦃ _ : Cs B ⦄
+      → {P : A → Type} {k : A} {v : B}
         ⦃ _ : DecEq A ⦄
         (spP : specProperty P) (m : Map A B)
       → ¬ P k

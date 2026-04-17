@@ -10,11 +10,11 @@ open import Axiom.Set
 open import Relation.Binary using (_Preserves_⟶_)
 
 opaque
-  List-Model : Theory {0ℓ}
+  List-Model : Theory {0ℓ} {0ℓ}
   List-Model = L.List-Model
-  List-Modelᶠ : Theoryᶠ
+  List-Modelᶠ : Theoryᶠ {0ℓ}
   List-Modelᶠ = L.List-Modelᶠ
-  List-Modelᵈ : Theoryᵈ
+  List-Modelᵈ : Theoryᵈ {0ℓ}
   List-Modelᵈ = L.List-Modelᵈ
 
 private variable
@@ -43,77 +43,82 @@ open import Axiom.Set.Properties th using (card-≡ᵉ)
 
 infixr 9 _∘ʳ_
 
-module _ ⦃ _ : DecEq A ⦄ where
-  open Restriction {A} ∈-sp public
+module _ ⦃ _ : Cs A ⦄ ⦃ _ : DecEq A ⦄ where
+  private module R' {B} ⦃ _ : Cs B ⦄ = Restriction {A} {B} ∈-sp
+  open R' public
     renaming (_∣_ to _∣ʳ_; _∣_ᶜ to _∣ʳ_ᶜ)
 
-  open Corestriction {A} ∈-sp public
-    renaming (_∣^_ to _∣^ʳ_; _∣^_ᶜ to _∣^ʳ_ᶜ) public
+  private module CR' {B} ⦃ _ : Cs B ⦄ ⦃ _ : DecEq B ⦄ = Corestriction {A} {B} (∈-sp {B})
+  open CR' public
+    renaming (_∣^_ to _∣^ʳ_; _∣^_ᶜ to _∣^ʳ_ᶜ)
 
-  open Restrictionᵐ {A} ∈-sp
-    renaming (res-cong to resᵐ-cong) public
-  open Corestrictionᵐ {A} ∈-sp
-    renaming (cores-cong to coresᵐ-cong) public
+  private module Rᵐ' {B} ⦃ _ : Cs B ⦄ = Restrictionᵐ {A} {B} ∈-sp
+  open Rᵐ' public
+    renaming (res-cong to resᵐ-cong)
+
+  private module CRᵐ' {B} ⦃ _ : Cs B ⦄ ⦃ _ : DecEq B ⦄ = Corestrictionᵐ {A} {B} (∈-sp {B})
+  open CRᵐ' public
+    renaming (cores-cong to coresᵐ-cong)
+
   open Unionᵐ {A} ∈-sp public
   open Intersection {A} ∈-sp public
-  open Lookupᵐ {A} ∈-sp public
   open Lookupᵐᵈ {A} ∈-sp public
 
-module _ ⦃ _ : DecEq A ⦄ ⦃ _ : DecEq B ⦄ where
+module _ ⦃ _ : Cs A ⦄ ⦃ _ : Cs B ⦄ ⦃ _ : DecEq A ⦄ ⦃ _ : DecEq B ⦄ where
   open Intersectionᵐ {A} {B} ∈-sp public
   open IndexedSumUnionᵐ {A} {B} ∈-sp (_∈? _) public
 
 module Properties where
   open import Axiom.Set.Properties th public
-  module _ ⦃ _ : DecEq A ⦄ where
+  module _ ⦃ _ : Cs A ⦄ ⦃ _ : DecEq A ⦄ where
     open Intersectionᵖ {A} ∈-sp public
 
 opaque
-  unfolding List-Model
+  unfolding List-Model List-Modelᶠ List-Modelᵈ
 
   to-sp : {A : Type} (P : A → Type) → ⦃ P ⁇¹ ⦄ → specProperty P
   to-sp _ = dec¹
 
-  finiteness : ∀ (X : Theory.Set th A) → finite X
+  finiteness : ⦃ _ : Cs A ⦄ → ∀ (X : Theory.Set th A) → finite X
   finiteness = Theoryᶠ.finiteness List-Modelᶠ
 
-  lengthˢ : ∀ {𝕊} ⦃ _ : DecEq A ⦄ ⦃ _ : IsSet 𝕊 A ⦄ → 𝕊 → ℕ
+  lengthˢ : ∀ {𝕊} ⦃ _ : Cs A ⦄ ⦃ _ : DecEq A ⦄ ⦃ _ : IsSet 𝕊 A ⦄ → 𝕊 → ℕ
   lengthˢ X = Theoryᶠ.lengthˢ List-Modelᶠ (toSet X)
 
-  lengthˢ-≡ᵉ :  ∀ {𝕊} ⦃ _ : DecEq A ⦄ ⦃ _ : IsSet 𝕊 A ⦄ → (X Y : 𝕊)
+  lengthˢ-≡ᵉ :  ∀ {𝕊} ⦃ _ : Cs A ⦄ ⦃ _ : DecEq A ⦄ ⦃ _ : IsSet 𝕊 A ⦄ → (X Y : 𝕊)
     → toSet X ≡ᵉ toSet Y
     → lengthˢ X ≡ lengthˢ Y
   lengthˢ-≡ᵉ X Y X≡Y =
     card-≡ᵉ (-, Theoryᶠ.DecEq⇒strongly-finite List-Modelᶠ (toSet X))
             (-, Theoryᶠ.DecEq⇒strongly-finite List-Modelᶠ (toSet Y)) X≡Y
 
-  setToList : ℙ A → List A
+  setToList : ⦃ _ : Cs A ⦄ → ℙ A → List A
   setToList = id
 
   instance
-    DecEq-ℙ : ⦃ _ : DecEq A ⦄ → DecEq (ℙ A)
+    DecEq-ℙ : ⦃ _ : Cs A ⦄ → ⦃ _ : DecEq A ⦄ → DecEq (ℙ A)
     DecEq-ℙ = L.Decˡ.DecEq-Set
 
-    Show-ℙ : ⦃ _ : Show A ⦄ → Show (ℙ A)
+    Show-ℙ : ⦃ _ : Cs A ⦄ → ⦃ _ : Show A ⦄ → Show (ℙ A)
     Show-ℙ .show = λ x → Show-finite .show (x , (finiteness x))
 
-_ᶠᵐ : A ⇀ B → FinMap A B
+_ᶠᵐ : ⦃ _ : Cs A ⦄ → ⦃ _ : Cs B ⦄ → A ⇀ B → FinMap A B
 (R , uniq) ᶠᵐ = (R , uniq , finiteness _)
 
-_ᶠˢ : ℙ A → FinSet A
+_ᶠˢ : ⦃ _ : Cs A ⦄ → ℙ A → FinSet A
 X ᶠˢ = X , finiteness _
 
-filterˢ : (P : A → Type) ⦃ _ : P ⁇¹ ⦄ → ℙ A → ℙ A
+filterˢ : ⦃ _ : Cs A ⦄ → (P : A → Type) ⦃ _ : P ⁇¹ ⦄ → ℙ A → ℙ A
 filterˢ P = filterˢ? (to-sp P)
 
 -- [ R ∘ʳ S ] = { (a , c) | ∃ b → (a , b) ∈ R × (b , c) ∈ S }
-_∘ʳ_ : {A B C : Type} ⦃ _ : DecEq B ⦄ → Rel A B → Rel B C → Rel A C
+_∘ʳ_ : {A B C : Type} ⦃ _ : Cs A ⦄ ⦃ _ : Cs B ⦄ ⦃ _ : Cs C ⦄ ⦃ _ : DecEq B ⦄ → Rel A B → Rel B C → Rel A C
 R ∘ʳ S =
   concatMapˢ
     (λ (a , b) → mapˢ ((a ,_) ∘ proj₂) $ filterˢ ((b ≡_) ∘ proj₁) S)
     R
 
-module _ {A B C : Type} ⦃ _ : DecEq B ⦄ {R R' : Rel A B} {S S' : Rel B C} where
+module _ {A B C : Type} ⦃ _ : Cs A ⦄ ⦃ _ : Cs B ⦄ ⦃ _ : Cs C ⦄ ⦃ _ : DecEq B ⦄ {R R' : Rel A B} {S S' : Rel B C} where
 
   open Equivalence
 
@@ -132,29 +137,29 @@ module _ {A B C : Type} ⦃ _ : DecEq B ⦄ {R R' : Rel A B} {S S' : Rel B C} wh
           ... | _ , refl , p with from ∈-filter p
           ... | (p , q) = to ∈-concatMapˢ (a , R≡R' .proj₂ a∈R , to ∈-map (_ , (refl , to ∈-filter (p , S≡S' .proj₂ q))))
 
-filterᵐ : (P : A × B → Type) ⦃ _ : P ⁇¹ ⦄ → (A ⇀ B) → (A ⇀ B)
+filterᵐ : ⦃ _ : Cs A ⦄ → ⦃ _ : Cs B ⦄ → (P : A × B → Type) ⦃ _ : P ⁇¹ ⦄ → (A ⇀ B) → (A ⇀ B)
 filterᵐ P = filterᵐ? (to-sp P)
 
-filterKeys : (P : A → Type) ⦃ _ : P ⁇¹ ⦄ → (A ⇀ B) → (A ⇀ B)
+filterKeys : ⦃ _ : Cs A ⦄ → ⦃ _ : Cs B ⦄ → (P : A → Type) ⦃ _ : P ⁇¹ ⦄ → (A ⇀ B) → (A ⇀ B)
 filterKeys P = filterKeys? (to-sp P)
 
-_∣^'_ : A ⇀ B → (P : B → Type) ⦃ _ : P ⁇¹ ⦄ → A ⇀ B
+_∣^'_ : ⦃ _ : Cs A ⦄ → ⦃ _ : Cs B ⦄ → A ⇀ B → (P : B → Type) ⦃ _ : P ⁇¹ ⦄ → A ⇀ B
 s ∣^' P = s ∣^'? to-sp P
 
-indexedSumᵛ' : ⦃ DecEq A ⦄ → ⦃ DecEq B ⦄ → ⦃ CommutativeMonoid 0ℓ 0ℓ C ⦄ → (B → C) → A ⇀ B → C
+indexedSumᵛ' : ⦃ _ : Cs A ⦄ → ⦃ _ : Cs B ⦄ → ⦃ DecEq A ⦄ → ⦃ DecEq B ⦄ → ⦃ CommutativeMonoid 0ℓ 0ℓ C ⦄ → (B → C) → A ⇀ B → C
 indexedSumᵛ' f m = indexedSumᵛ f (m ᶠᵐ)
 
-indexedSum' : ⦃ DecEq A ⦄ → ⦃ CommutativeMonoid 0ℓ 0ℓ B ⦄ → (A → B) → ℙ A → B
+indexedSum' : ⦃ _ : Cs A ⦄ → ⦃ DecEq A ⦄ → ⦃ CommutativeMonoid 0ℓ 0ℓ B ⦄ → (A → B) → ℙ A → B
 indexedSum' f s = indexedSum f (s ᶠˢ)
 
 syntax indexedSumᵛ' (λ a → x) m = ∑[ a ← m ] x
 syntax indexedSum'  (λ a → x) m = ∑ˢ[ a ← m ] x
 
-module _ ⦃ _ : DecEq A ⦄ ⦃ _ : CommutativeMonoid 0ℓ 0ℓ C ⦄ where
+module _ ⦃ _ : Cs A ⦄ ⦃ _ : Cs C ⦄ ⦃ _ : DecEq A ⦄ ⦃ _ : CommutativeMonoid 0ℓ 0ℓ C ⦄ where
 
   open CommutativeMonoid it
 
-  module _ ⦃ _ : DecEq B ⦄ where
+  module _ ⦃ _ : Cs B ⦄ ⦃ _ : DecEq B ⦄ where
 
     aggregateBy : ⦃ DecEq C ⦄ → Rel A B → A ⇀ C → B ⇀ C
     aggregateBy R m =
