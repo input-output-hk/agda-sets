@@ -47,7 +47,7 @@ Dec-SpecProperty = record
   { specProperty = Decidable¹
   ; sp-∘         = λ P? → P? ∘_
   ; sp-¬         = λ P? → ¬? ∘ P?
-  ; sp-∩         = λ P? Q? _ → P? _ ×-dec Q? _
+  ; sp-∩         = λ P? Q? _ → P? _ ×? Q? _
   }
 
 record Theory {ℓ} : Type (sucˡ ℓ) where
