@@ -60,57 +60,6 @@
         "type": "github"
       }
     },
-    "agda-stdlib": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1780406156,
-        "narHash": "sha256-cnYKW/KRKVsTBupQo1DNnH5Cx7sh6W+NEsZPHRWIBjE=",
-        "owner": "agda",
-        "repo": "agda-stdlib",
-        "rev": "2a5a0dec0a3cb5c87468ce101388a513d39dbf10",
-        "type": "github"
-      },
-      "original": {
-        "owner": "agda",
-        "ref": "v2.4",
-        "repo": "agda-stdlib",
-        "type": "github"
-      }
-    },
-    "agda-stdlib-classes": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1793783939,
-        "narHash": "sha256-Wzeg5d527TXFgbInht4GdC2B24GLSEHuEt+23tM6dA8=",
-        "owner": "agda",
-        "repo": "agda-stdlib-classes",
-        "rev": "a21d7b5ed8326cbe2f10ac13bd3c6cbee12d2caf",
-        "type": "github"
-      },
-      "original": {
-        "owner": "agda",
-        "ref": "v2.4",
-        "repo": "agda-stdlib-classes",
-        "type": "github"
-      }
-    },
-    "agda-stdlib-meta": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1793815774,
-        "narHash": "sha256-glzhBrOMHHxHrulNyW+5Tnz4MJNkYjvTJhGF/XYoTR8=",
-        "owner": "agda",
-        "repo": "agda-stdlib-meta",
-        "rev": "7729b31c2decf0b4b46ac58a6c6ae28d3e711d2c",
-        "type": "github"
-      },
-      "original": {
-        "owner": "agda",
-        "ref": "v2.4",
-        "repo": "agda-stdlib-meta",
-        "type": "github"
-      }
-    },
     "categorical-crypto": {
       "flake": false,
       "locked": {
@@ -145,24 +94,6 @@
         "type": "github"
       }
     },
-    "flake-utils_2": {
-      "inputs": {
-        "systems": "systems_2"
-      },
-      "locked": {
-        "lastModified": 1731533236,
-        "narHash": "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI=",
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
-        "type": "github"
-      },
-      "original": {
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "type": "github"
-      }
-    },
     "iog-prelude": {
       "flake": false,
       "locked": {
@@ -181,37 +112,69 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1760540543,
-        "narHash": "sha256-G+no9GtVMzzTI/jBk3o4vh/Jvc2wlelnpVTJnKCJh3Q=",
+        "lastModified": 1794165970,
+        "narHash": "sha256-XuAV2cUwaod3Bt4XFVqiXz3v1w2ex16W6Sv4S7EWres=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "d5778a03d301eaa07919df860b18c8656c5ab6e2",
+        "rev": "ac588ef1c914865dad517b337ea0eb9694a4021c",
         "type": "github"
       },
       "original": {
         "owner": "NixOS",
+        "ref": "nixos-26.05",
         "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_2": {
+      "locked": {
+        "lastModified": 1782691344,
+        "narHash": "sha256-i5nw9BYYsMDAaOC4J+JmTof6b2GhlyH076awYRNrTV8=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "1f01958ffb5b3545c96d9ef2f4e24c5e5e1eb846",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-26.05",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "pagda": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_2"
+      },
+      "locked": {
+        "lastModified": 1794233145,
+        "narHash": "sha256-mmk9LV5kMr8BKQhemjovlg90n/lYSWBRHdRuJkPMyOw=",
+        "owner": "WhatisRT",
+        "repo": "pagda",
+        "rev": "91fb73bb07898f4a77127b9daf44b8b1c21c13d4",
+        "type": "github"
+      },
+      "original": {
+        "owner": "WhatisRT",
+        "repo": "pagda",
         "type": "github"
       }
     },
     "root": {
       "inputs": {
         "agda-nix": "agda-nix",
-        "agda-stdlib": "agda-stdlib",
-        "agda-stdlib-classes": "agda-stdlib-classes",
-        "agda-stdlib-meta": "agda-stdlib-meta",
-        "flake-utils": "flake-utils_2",
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "pagda": "pagda"
       }
     },
     "standard-library": {
       "flake": false,
       "locked": {
-        "lastModified": 1754140663,
-        "narHash": "sha256-JOeoek6OfyIk9vwTj5QUJU6LnRzwfiG0e0ysW6zbhZ8=",
+        "lastModified": 1780406156,
+        "narHash": "sha256-cnYKW/KRKVsTBupQo1DNnH5Cx7sh6W+NEsZPHRWIBjE=",
         "owner": "agda",
         "repo": "agda-stdlib",
-        "rev": "8326c7475af1fa456ca04a0203c168d5d7ff842b",
+        "rev": "2a5a0dec0a3cb5c87468ce101388a513d39dbf10",
         "type": "github"
       },
       "original": {
@@ -223,11 +186,11 @@
     "standard-library-classes": {
       "flake": false,
       "locked": {
-        "lastModified": 1754406591,
-        "narHash": "sha256-tuXuZcwu6XNFP979oSZg0yfFY9eMyqpkUNddk+QchVc=",
+        "lastModified": 1793783939,
+        "narHash": "sha256-Wzeg5d527TXFgbInht4GdC2B24GLSEHuEt+23tM6dA8=",
         "owner": "agda",
         "repo": "agda-stdlib-classes",
-        "rev": "e732956fb01eb616bb3429f290d9434f4ab59b6a",
+        "rev": "a21d7b5ed8326cbe2f10ac13bd3c6cbee12d2caf",
         "type": "github"
       },
       "original": {
@@ -239,11 +202,11 @@
     "standard-library-meta": {
       "flake": false,
       "locked": {
-        "lastModified": 1784039623,
-        "narHash": "sha256-HQX2phq5CtAsczRRS0A6llWzjKGAeRksNgj8PLGu8kQ=",
+        "lastModified": 1793815774,
+        "narHash": "sha256-glzhBrOMHHxHrulNyW+5Tnz4MJNkYjvTJhGF/XYoTR8=",
         "owner": "agda",
         "repo": "agda-stdlib-meta",
-        "rev": "5690f324fcde24aea4c58011035185150f65058b",
+        "rev": "7729b31c2decf0b4b46ac58a6c6ae28d3e711d2c",
         "type": "github"
       },
       "original": {
@@ -253,21 +216,6 @@
       }
     },
     "systems": {
-      "locked": {
-        "lastModified": 1681028828,
-        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
-        "owner": "nix-systems",
-        "repo": "default",
-        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-systems",
-        "repo": "default",
-        "type": "github"
-      }
-    },
-    "systems_2": {
       "locked": {
         "lastModified": 1681028828,
         "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
