@@ -6,20 +6,24 @@
 
     flake-utils.url = "github:numtide/flake-utils";
 
-    shellFor = {
-      url = "github:input-output-hk/agda.nix?dir=tools/shellFor";
+    agda-nix = {
+      url = "github:input-output-hk/agda.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    standard-library-classes = {
-      url = "github:input-output-hk/agda.nix?dir=libraries/standard-library-classes";
-      inputs.nixpkgs.follows = "nixpkgs";
+    agda-stdlib = {
+      url = "github:agda/agda-stdlib/v2.4";
+      flake = false;
     };
 
-    standard-library-meta = {
-      url = "github:input-output-hk/agda.nix?dir=libraries/standard-library-meta";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.standard-library-classes.follows = "standard-library-classes";
+    agda-stdlib-classes = {
+      url = "github:agda/agda-stdlib-classes/v2.4";
+      flake = false;
+    };
+
+    agda-stdlib-meta = {
+      url = "github:agda/agda-stdlib-meta/v2.4";
+      flake = false;
     };
   };
 
@@ -28,6 +32,7 @@
       self,
       nixpkgs,
       flake-utils,
+      agda-nix,
       ...
     }:
     let
@@ -36,12 +41,22 @@
         "aarch64-darwin"
       ];
       overlay = nixpkgs.lib.composeManyExtensions [
-        inputs.standard-library-classes.overlays.default
-        inputs.standard-library-meta.overlays.default
+        inputs.agda-nix.overlays.default
         (final: prev: {
           agdaPackages = prev.agdaPackages.overrideScope (
             afinal: aprev: {
-              abstract-set-theory = afinal.callPackage ./nix/abstract-set-theory.nix { };
+              standard-library = aprev.standard-library.overrideAttrs (_: {
+                src = inputs.agda-stdlib;
+              });
+              standard-library-classes = aprev.standard-library-classes.overrideAttrs (_: {
+                src = inputs.agda-stdlib-classes;
+              });
+              standard-library-meta = aprev.standard-library-meta.overrideAttrs (_: {
+                src = inputs.agda-stdlib-meta;
+              });
+              abstract-set-theory = aprev.abstract-set-theory.overrideAttrs (_: {
+                src = ./.;
+              });
             }
           );
         })
@@ -53,7 +68,6 @@
         pkgs = import nixpkgs {
           inherit system;
           overlays = [
-            inputs.shellFor.overlays.default
             overlay
           ];
         };
