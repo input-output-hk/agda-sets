@@ -4,7 +4,7 @@
 open import abstract-set-theory.Prelude
 open import Axiom.Set using (Theory)
 
-module Axiom.Set.Map (th : Theory) where
+module Axiom.Set.Map {ℓ} {ℓ_c} (th : Theory {ℓ} {ℓ_c}) where
 
 open Theory th renaming (map to mapˢ)
 
@@ -40,68 +40,65 @@ private
       ∷ quote ∈-filter⁺' ∷ quote ∈-∪⁺ ∷ quote ∈-map⁺' ∷ quote ∈-fromList⁺ ∷ [])
 
   variable
-    A A' B B' C D : Type
-    R R' : Rel A B
-    X Y : Set A
-    a : A
-    a' : A'
-    b : B
-    b' : B'
+    A A' B B' C D : Type ℓ
 
   ×-dup : ∀ {ℓ} {A : Type ℓ} → A → A × A
   ×-dup x = x , x
 
-left-unique : Rel A B → Type
+left-unique : ⦃ _ : Cs A ⦄ → ⦃ _ : Cs B ⦄ → Rel A B → Type ℓ
 left-unique R = ∀ {a b b'} → (a , b) ∈ R → (a , b') ∈ R → b ≡ b'
 
-record IsLeftUnique (R : Rel A B) : Type where
+record IsLeftUnique ⦃ _ : Cs A ⦄ ⦃ _ : Cs B ⦄ (R : Rel A B) : Type ℓ where
   field isLeftUnique : left-unique R
 
 instance
-  ∅-left-unique : IsLeftUnique {A = A} {B = B} ∅
+  ∅-left-unique : ⦃ _ : Cs A ⦄ → ⦃ _ : Cs B ⦄ → IsLeftUnique {A = A} {B = B} ∅
   ∅-left-unique .IsLeftUnique.isLeftUnique h h' = ⊥-elim $ ∉-∅ h
 
-⊆-left-unique : R ⊆ R' → left-unique R' → left-unique R
+⊆-left-unique : ⦃ _ : Cs A ⦄ → ⦃ _ : Cs B ⦄
+  → {R R' : Rel A B} → R ⊆ R' → left-unique R' → left-unique R
 ⊆-left-unique R⊆R' h = R⊆R' -⟨ h ⟩- R⊆R' -- on isn't dependent enough
 
-left-unique-mapˢ : {f : A → B} (X : Set A) → left-unique (mapˢ (λ y → (y , f y)) X)
+left-unique-mapˢ : ⦃ _ : Cs A ⦄ → ⦃ _ : Cs B ⦄
+  → {f : A → B} (X : Set A) → left-unique (mapˢ (λ y → (y , f y)) X)
 left-unique-mapˢ _ p q with from ∈-map p | from ∈-map q
 ... | _ , refl , _ | _ , refl , _ = refl
 
-Map : Type → Type → Type
+Map : (A B : Type ℓ) → ⦃ _ : Cs A ⦄ → ⦃ _ : Cs B ⦄ → Type ℓ
 Map A B = Σ (Rel A B) left-unique
 
 infix 4 _≡ᵐ_
 
-_≡ᵐ_ : Map A B → Map A B → Type
+_≡ᵐ_ : ⦃ _ : Cs A ⦄ → ⦃ _ : Cs B ⦄ → Map A B → Map A B → Type ℓ
 (x , _) ≡ᵐ (y , _) = x ≡ᵉ y
 
 infix 4 _≢ᵐ_
 
-_≢ᵐ_ : Map A B → Map A B → Type
+_≢ᵐ_ : ⦃ _ : Cs A ⦄ → ⦃ _ : Cs B ⦄ → Map A B → Map A B → Type ℓ
 a ≢ᵐ b = ¬ a ≡ᵐ b
 
-private variable m m' : Map A B
-
-_ˢ : Map A B → Rel A B
+_ˢ : ⦃ _ : Cs A ⦄ → ⦃ _ : Cs B ⦄ → Map A B → Rel A B
 _ˢ = proj₁
 
-_ᵐ : (R : Rel A B) → ⦃ IsLeftUnique R ⦄ → Map A B
+_ᵐ : ⦃ _ : Cs A ⦄ → ⦃ _ : Cs B ⦄
+  → (R : Rel A B) → ⦃ IsLeftUnique R ⦄ → Map A B
 _ᵐ R ⦃ record { isLeftUnique = h } ⦄ = R , h
 
-⊆-map : (f : Rel A B → Rel A B) → (∀ {R} → f R ⊆ R) → Map A B → Map A B
+⊆-map : ⦃ _ : Cs A ⦄ → ⦃ _ : Cs B ⦄
+  → (f : Rel A B → Rel A B) → (∀ {R} → f R ⊆ R) → Map A B → Map A B
 ⊆-map f H m = f (m ˢ) , ⊆-left-unique H (proj₂ m)
 
-ˢ-left-unique : IsLeftUnique (m ˢ)
+ˢ-left-unique : ⦃ _ : Cs A ⦄ → ⦃ _ : Cs B ⦄
+  → {m : Map A B} → IsLeftUnique (m ˢ)
 ˢ-left-unique {m = m} = record { isLeftUnique = proj₂ m }
 
 instance
   _ = ˢ-left-unique
 
-∅ᵐ : Map A B
+∅ᵐ : ⦃ _ : Cs A ⦄ → ⦃ _ : Cs B ⦄ → Map A B
 ∅ᵐ = _ᵐ ∅ ⦃ ∅-left-unique ⦄
 
-fromListᵐ : ⦃ _ : DecEq A ⦄ → List (A × B) → Map A B
+fromListᵐ : ⦃ _ : Cs A ⦄ → ⦃ _ : Cs B ⦄ → ⦃ _ : DecEq A ⦄ → List (A × B) → Map A B
 fromListᵐ l = fromList (deduplicate (λ x y → proj₁ x ≟ proj₁ y) l) ,
   (λ where (inj₁ refl)     → refl
            (inj₂ (inj₁ x)) → ⊥-elim (x refl)
@@ -111,43 +108,47 @@ fromListᵐ l = fromList (deduplicate (λ x y → proj₁ x ≟ proj₁ y) l) ,
   where open import Data.List.Relation.Unary.Unique.DecSetoid.Properties
         import Relation.Binary.Construct.On as On
 
-FinMap : Type → Type → Type
+FinMap : (A B : Type ℓ) → ⦃ _ : Cs A ⦄ → ⦃ _ : Cs B ⦄ → Type ℓ
 FinMap A B = Σ (Rel A B) (λ R → left-unique R × finite R)
 
-toFinMap : (m : Map A B) → finite (m ˢ) → FinMap A B
+toFinMap : ⦃ _ : Cs A ⦄ → ⦃ _ : Cs B ⦄
+  → (m : Map A B) → finite (m ˢ) → FinMap A B
 toFinMap (m , h) fin = m , h , fin
 
-toMap : FinMap A B → Map A B
+toMap : ⦃ _ : Cs A ⦄ → ⦃ _ : Cs B ⦄ → FinMap A B → Map A B
 toMap (m , l , _) = m , l
 
-toRel : FinMap A B → Rel A B
+toRel : ⦃ _ : Cs A ⦄ → ⦃ _ : Cs B ⦄ → FinMap A B → Rel A B
 toRel (m , l , _) = m
 
-module Intersectionᵐ (sp-∈ : spec-∈ (A × B)) where
+module Intersectionᵐ ⦃ _ : Cs A ⦄ ⦃ _ : Cs B ⦄ (sp-∈ : spec-∈ (A × B)) where
   open Intersection sp-∈
   open Intersectionᵖ sp-∈
 
   _∩ᵐ_ : Map A B → Map A B → Map A B
   m ∩ᵐ m' = (m ˢ ∩ m' ˢ , ⊆-left-unique ∩-⊆ˡ (proj₂ m))
 
-disj-∪ : (m m' : Map A B) → disjoint (dom (m ˢ)) (dom (m' ˢ)) → Map A B
+disj-∪ : ⦃ _ : Cs A ⦄ → ⦃ _ : Cs B ⦄
+  → (m m' : Map A B) → disjoint (dom (m ˢ)) (dom (m' ˢ)) → Map A B
 disj-∪ m m' disj = m ˢ ∪ m' ˢ , λ h h' → case ∈-∪⁻ h , ∈-∪⁻ h' of λ where
   (inj₁ hm  , inj₁ h'm)  → proj₂ m hm h'm
   (inj₂ hm' , inj₁ h'm)  → ⊥-elim $ disj (∈-map⁺'' h'm) (∈-map⁺'' hm')
   (inj₁ hm  , inj₂ h'm') → ⊥-elim $ disj (∈-map⁺'' hm)  (∈-map⁺'' h'm')
   (inj₂ hm' , inj₂ h'm') → proj₂ m' hm' h'm'
 
-disj-∪-cong : {m m' m'' m''' : Map A B}
+disj-∪-cong : ⦃ _ : Cs A ⦄ → ⦃ _ : Cs B ⦄
+              → {m m' m'' m''' : Map A B}
               {m∩m'≡∅ : disjoint (dom (m ˢ)) (dom (m' ˢ))}
               {m''∩m'''≡∅ : disjoint (dom (m'' ˢ)) (dom (m''' ˢ))}
               → m ≡ᵐ m'' → m' ≡ᵐ m'''
               → disj-∪ m m' m∩m'≡∅ ≡ᵐ disj-∪ m'' m''' m''∩m'''≡∅
 disj-∪-cong m≡m' m''≡m''' = ∪-cong m≡m' m''≡m'''
 
-filterᵐ : {P : Pred (A × B) 0ℓ} → specProperty P → Map A B → Map A B
+filterᵐ : ⦃ _ : Cs A ⦄ → ⦃ _ : Cs B ⦄
+  → {P : Pred (A × B) 0ℓ} → specProperty P → Map A B → Map A B
 filterᵐ sp-P m = filter sp-P (m ˢ) , ⊆-left-unique filter-⊆ (proj₂ m)
 
-module _ {P : Pred (A × B) 0ℓ} {spP : specProperty P} where
+module _ ⦃ _ : Cs A ⦄ ⦃ _ : Cs B ⦄ {P : Pred (A × B) 0ℓ} {spP : specProperty P} where
   filterᵐ-idem : ∀ {m : Map A B} → filterᵐ spP (filterᵐ spP m) ≡ᵐ filterᵐ spP m
   filterᵐ-idem = filter-idem
 
@@ -163,21 +164,24 @@ module _ {P : Pred (A × B) 0ℓ} {spP : specProperty P} where
       filterᵐspPm⊇filterᵐspPm' p with from ∈-filter p
       ... | (q , p) = to ∈-filter (q , proj₂ m≡m' p)
 
-filterᵐ-finite : {P : A × B → Type} → (sp : specProperty P) → Decidable P
+filterᵐ-finite : ⦃ _ : Cs A ⦄ → ⦃ _ : Cs B ⦄
+  → {m : Map A B} {P : A × B → Type} → (sp : specProperty P) → Decidable P
   → finite (m ˢ) → finite (filterᵐ sp m ˢ)
 filterᵐ-finite = filter-finite
 
-filterKeys : {P : A → Type} → specProperty P → Map A B → Map A B
+filterKeys : ⦃ _ : Cs A ⦄ → ⦃ _ : Cs B ⦄
+  → {P : A → Type} → specProperty P → Map A B → Map A B
 filterKeys sp-P = filterᵐ (sp-∘ sp-P proj₁)
 
-singletonᵐ : A → B → Map A B
+singletonᵐ : ⦃ _ : Cs A ⦄ → ⦃ _ : Cs B ⦄ → A → B → Map A B
 singletonᵐ a b = ❴ (a , b) ❵
                , (from ∈-singleton -⟨ (λ where refl refl → refl) ⟩- from ∈-singleton)
 
-❴_❵ᵐ : A × B → Map A B
+❴_❵ᵐ : ⦃ _ : Cs A ⦄ → ⦃ _ : Cs B ⦄ → A × B → Map A B
 ❴ k , v ❵ᵐ = singletonᵐ k v
 
-disj-dom : ∀ {m m₁ m₂ : Map A B}
+disj-dom : ⦃ _ : Cs A ⦄ → ⦃ _ : Cs B ⦄
+  → ∀ {m m₁ m₂ : Map A B}
   → (m ˢ) ≡ (m₁ ˢ) ⨿ (m₂ ˢ)
   → disjoint (dom (m₁ ˢ)) (dom (m₂ ˢ))
 disj-dom {m = m@(_ , uniq)} {m₁} {m₂} (m≡m₁∪m₂ , disj) a∈domm₁ a∈domm₂
@@ -188,13 +192,14 @@ disj-dom {m = m@(_ , uniq)} {m₁} {m₂} (m≡m₁∪m₂ , disj) a∈domm₁ a
     ∈mᵢ⇒∈m : ∀ {a} → a ∈ (m₁ ˢ) ⊎ a ∈ (m₂ ˢ) → a ∈ (m ˢ)
     ∈mᵢ⇒∈m = proj₂ m≡m₁∪m₂ ∘ to ∈-∪
 
-InjectiveOn : Set A → (A → B) → Type
+InjectiveOn : ⦃ _ : Cs A ⦄ → Set A → (A → B) → Type ℓ
 InjectiveOn X f = ∀ {x y} → x ∈ X → y ∈ X → f x ≡ f y → x ≡ y
 
-weaken-Injective : ∀ {X : Set A} {f : A → B} → Injective _≡_ _≡_ f → InjectiveOn X f
+weaken-Injective : ⦃ _ : Cs A ⦄ → ∀ {X : Set A} {f : A → B} → Injective _≡_ _≡_ f → InjectiveOn X f
 weaken-Injective p _ _ = p
 
-mapˡ-uniq : {f : A → A'}
+mapˡ-uniq : ⦃ _ : Cs A ⦄ → ⦃ _ : Cs A' ⦄ → ⦃ _ : Cs B ⦄
+  → {R : Rel A B} {f : A → A'}
   → {@(tactic by-eq) inj : InjectiveOn (dom R) f}
   → left-unique R
   → left-unique (mapˡ f R)
@@ -206,35 +211,38 @@ mapˡ-uniq {inj = inj} uniq = λ h h' → case ∈⇔P h ,′ ∈⇔P h' of λ w
                                   (×-≡,≡←≡ eqb))
               Hb
 
-mapʳ-uniq : {f : B → B'} → left-unique R → left-unique (mapʳ f R)
+mapʳ-uniq : ⦃ _ : Cs A ⦄ → ⦃ _ : Cs B ⦄ → ⦃ _ : Cs B' ⦄
+  → {R : Rel A B} {f : B → B'} → left-unique R → left-unique (mapʳ f R)
 mapʳ-uniq uniq = λ h h' → case ∈⇔P h ,′ ∈⇔P h' of λ where
   ((_ , refl , Ha) , (_ , refl , Hb)) → cong _ $ uniq Ha Hb
 
-mapKeys : (f : A → A') → (m : Map A B)
+mapKeys : ⦃ _ : Cs A ⦄ → ⦃ _ : Cs A' ⦄ → ⦃ _ : Cs B ⦄
+  → (f : A → A') → (m : Map A B)
   → {@(tactic by-eq) _ : InjectiveOn (dom (m ˢ)) f}
   → Map A' B
 mapKeys f (R , uniq) {inj} = mapˡ f R , mapˡ-uniq {inj = inj} uniq
 
-mapValues : (B → B') → Map A B → Map A B'
+mapValues : ⦃ _ : Cs A ⦄ → ⦃ _ : Cs B ⦄ → ⦃ _ : Cs B' ⦄
+  → (B → B') → Map A B → Map A B'
 mapValues f (R , uniq) = mapʳ f R , mapʳ-uniq uniq
 
-module Unionᵐ (sp-∈ : spec-∈ A) where
+module Unionᵐ ⦃ _ : Cs A ⦄ (sp-∈ : spec-∈ A) where
   infixr 6 _∪ˡ_
 
-  _∪ˡ'_ : Rel A B → Rel A B → Rel A B
+  _∪ˡ'_ : ⦃ _ : Cs B ⦄ → Rel A B → Rel A B → Rel A B
   m ∪ˡ' m' = m ∪ filter (sp-∘ (sp-¬ (sp-∈ {dom m})) proj₁) m'
 
   private
-     disjoint-proof : ∀ (m m' : Map A B)
+     disjoint-proof : ⦃ _ : Cs B ⦄ → ∀ (m m' : Map A B)
                     → disjoint (dom (m ˢ)) (dom (filterᵐ (sp-∘ (sp-¬ (sp-∈ {dom (m ˢ)})) (λ r → proj₁ r)) m' ˢ))
      disjoint-proof m m' p q with from ∈-map q
      ... | _ , refl , q with from ∈-filter q
      ... | q , _ = q p
 
-  _∪ˡ_ : Map A B → Map A B → Map A B
+  _∪ˡ_ : ⦃ _ : Cs B ⦄ → Map A B → Map A B → Map A B
   m ∪ˡ m' = disj-∪ m (filterᵐ (sp-∘ (sp-¬ sp-∈) proj₁) m') (disjoint-proof m m')
 
-  ∪ˡ-cong : ∀ {m m' m'' m''' : Map A B} → m ≡ᵐ m'' → m' ≡ᵐ m''' → (m ∪ˡ m') ≡ᵐ (m'' ∪ˡ m''')
+  ∪ˡ-cong : ⦃ _ : Cs B ⦄ → ∀ {m m' m'' m''' : Map A B} → m ≡ᵐ m'' → m' ≡ᵐ m''' → (m ∪ˡ m') ≡ᵐ (m'' ∪ˡ m''')
   ∪ˡ-cong {m = m} {m' = m'} {m'' = m''} {m''' = m'''} m≡m'' m'≡m'''
     = disj-∪-cong {m = m} {m' = (filterᵐ (sp-∘ (sp-¬ sp-∈) proj₁) m')} {m'' = m''} {m''' = (filterᵐ (sp-∘ (sp-¬ sp-∈) proj₁) m''')}
                   {m∩m'≡∅ = disjoint-proof m m'} {m''∩m'''≡∅ = disjoint-proof m'' m'''} m≡m'' (⊆ , ⊇)
@@ -247,12 +255,12 @@ module Unionᵐ (sp-∈ : spec-∈ A) where
       ⊆ p with from ∈-filter p
       ... | p , q = to ∈-filter ((λ x → p (dom-cong m≡m'' .proj₂ x)) , m'≡m''' .proj₁ q)
 
-  disjoint-∪ˡ-∪ : (H : disjoint (dom R) (dom R')) → R ∪ˡ' R' ≡ᵉ R ∪ R'
+  disjoint-∪ˡ-∪ : ⦃ _ : Cs B ⦄ → {R R' : Rel A B} → (H : disjoint (dom R) (dom R')) → R ∪ˡ' R' ≡ᵉ R ∪ R'
   disjoint-∪ˡ-∪ disj = from ≡ᵉ⇔≡ᵉ' λ _ → mk⇔
     (∈-∪⁺ ∘′ ⊎.map₂ (proj₂ ∘′ ∈⇔P) ∘′ ∈⇔P)
     (∈⇔P ∘′ ⊎.map₂ (to ∈-filter ∘′ (λ h → (flip disj (∈-map⁺'' h)) , h)) ∘ ∈⇔P)
 
-  singleton-∈-∪ˡ : a ∈ dom (m ˢ) → m ∪ˡ ❴ (a , b) ❵ᵐ ≡ᵐ m
+  singleton-∈-∪ˡ : ⦃ _ : Cs B ⦄ → {a : A} {b : B} {m : Map A B} → a ∈ dom (m ˢ) → m ∪ˡ ❴ (a , b) ❵ᵐ ≡ᵐ m
   singleton-∈-∪ˡ {m = m} a∈domm .proj₁ x with (from ∈-∪ x)
   ... | inj₁ h = h
   ... | inj₂ h = case from ∈-filter h of λ where
@@ -260,18 +268,22 @@ module Unionᵐ (sp-∈ : spec-∈ A) where
                                     (sym (from ∈-singleton h₂)) a∈domm
   singleton-∈-∪ˡ _ .proj₂ = ∪-⊆ˡ
 
-  insert : Map A B → A → B → Map A B
+  insert : ⦃ _ : Cs B ⦄ → Map A B → A → B → Map A B
   insert m a b = ❴ a , b ❵ᵐ ∪ˡ m
 
-  insertIfJust : ⦃ DecEq A ⦄ → A → Maybe B → Map A B → Map A B
+  insertIfJust : ⦃ _ : Cs B ⦄ → ⦃ DecEq A ⦄ → A → Maybe B → Map A B → Map A B
   insertIfJust x nothing  m  = m
   insertIfJust x (just y) m  = insert m x y
 
-  disjoint-∪ˡ-mapValues : {M M' : Map A B}
+-- disjoint-∪ˡ-mapValues needs both B and C constraints. It is defined as a
+-- standalone function so that both ∪ˡ on Map A B and ∪ˡ on Map A C can be used.
+module _ ⦃ _ : Cs A ⦄ ⦃ _ : Cs B ⦄ ⦃ _ : Cs C ⦄ where
+  disjoint-∪ˡ-mapValues : (sp-∈ : spec-∈ A) → {M M' : Map A B}
                           (f : B → C)
                           → (H : disjoint (dom (M ˢ)) (dom (M' ˢ)))
-                          → (mapValues f (M ∪ˡ M')) ˢ ≡ᵉ (mapValues f M ∪ˡ mapValues f M') ˢ
-  disjoint-∪ˡ-mapValues {M = M} {M'} f disj = begin
+                          → let open Unionᵐ sp-∈ in
+                            (mapValues f (M ∪ˡ M')) ˢ ≡ᵉ (mapValues f M ∪ˡ mapValues f M') ˢ
+  disjoint-∪ˡ-mapValues sp-∈ {M = M} {M'} f disj = begin
     proj₁ (mapValues f (M ∪ˡ M'))
     ≈⟨ map-≡ᵉ (disjoint-∪ˡ-∪ disj) ⟩
     (mapʳ f ((proj₁ M) ∪ (proj₁ M')))
@@ -281,23 +293,26 @@ module Unionᵐ (sp-∈ : spec-∈ A) where
     proj₁ (mapValues f M ∪ˡ mapValues f M')
     ∎
    where open SetoidReasoning ≡ᵉ-Setoid
+         open Unionᵐ sp-∈
 
-map⦅×-dup⦆-uniq : ∀ {x : Set A} → left-unique (mapˢ ×-dup x)
+map⦅×-dup⦆-uniq : ⦃ _ : Cs A ⦄ → ∀ {x : Set A} → left-unique (mapˢ ×-dup x)
 map⦅×-dup⦆-uniq x y with ∈-map⁻' x | ∈-map⁻' y
 ... | fst , refl , _ | .fst , refl , _ = refl
 
-mapˡ∘map⦅×-dup⦆-uniq : ∀ {S : Set A} {f : A → B}
+mapˡ∘map⦅×-dup⦆-uniq : ⦃ _ : Cs A ⦄ → ⦃ _ : Cs B ⦄
+  → ∀ {S : Set A} {f : A → B}
   → {@(tactic by-eq) inj : Injective _≡_ _≡_ f}
   → left-unique $ mapˡ f (mapˢ ×-dup S)
 mapˡ∘map⦅×-dup⦆-uniq {inj = inj} = mapˡ-uniq {inj = λ _ _ → inj} map⦅×-dup⦆-uniq
 
-idMap : Set A → Map A A
+idMap : ⦃ _ : Cs A ⦄ → Set A → Map A A
 idMap s = -, map⦅×-dup⦆-uniq {x = s}
 
-mapFromFun : (A → B) → Set A → Map A B
+mapFromFun : ⦃ _ : Cs A ⦄ → ⦃ _ : Cs B ⦄ → (A → B) → Set A → Map A B
 mapFromFun f s = mapValues f (idMap s)
 
-mapFromFun-cong : ∀ {X Y : Set A} (f : A → B)
+mapFromFun-cong : ⦃ _ : Cs A ⦄ → ⦃ _ : Cs B ⦄
+  → ∀ {X Y : Set A} (f : A → B)
                 → X ≡ᵉ Y
                 → mapFromFun f X ≡ᵐ mapFromFun f Y
 mapFromFun-cong {X = X} {Y} f X≡Y = mapFromFunfX⊆mapFromFunfY , mapFromFunfY⊆mapFromFunfX
@@ -312,36 +327,44 @@ mapFromFun-cong {X = X} {Y} f X≡Y = mapFromFunfX⊆mapFromFunfY , mapFromFunfY
       ... | ((a , b) , refl , p) with from ∈-map p
       ... | (c , refl , p) = to ∈-map ((a , b) , refl , (to ∈-map (a , (refl , (X≡Y .proj₂ p)))))
 
-mapWithKey-uniq : {f : A → B → B'}
+mapWithKey-uniq : ⦃ _ : Cs A ⦄ → ⦃ _ : Cs B ⦄ → ⦃ _ : Cs B' ⦄
+  → {R : Rel A B} {f : A → B → B'}
   → left-unique R
   → left-unique (mapˢ (λ { (x , y) → x , f x y }) R)
 mapWithKey-uniq {f = f} uniq p q with from ∈-map p | from ∈-map q
 ... | (x , y) , refl , xy∈r | (x' , y') , refl , xy'∈r = cong (f x) (uniq xy∈r xy'∈r)
 
-mapWithKey : (A → B → B') → Map A B → Map A B'
+mapWithKey : ⦃ _ : Cs A ⦄ → ⦃ _ : Cs B ⦄ → ⦃ _ : Cs B' ⦄
+  → (A → B → B') → Map A B → Map A B'
 mapWithKey f m@(r , p) = mapˢ (λ { (x , y) → x , f x y}) r , mapWithKey-uniq p
 
-mapValues-dom : {f : B → C} → dom (m ˢ) ≡ᵉ dom (mapValues f m ˢ)
+mapValues-dom : ⦃ _ : Cs A ⦄ → ⦃ _ : Cs B ⦄ → ⦃ _ : Cs C ⦄
+  → {m : Map A B} {f : B → C} → dom (m ˢ) ≡ᵉ dom (mapValues f m ˢ)
 mapValues-dom {m = _ , _} = mapʳ-dom
 
-_∣'_ : {P : A → Type} → Map A B → specProperty P → Map A B
+_∣'_ : ⦃ _ : Cs A ⦄ → ⦃ _ : Cs B ⦄
+  → {P : A → Type} → Map A B → specProperty P → Map A B
 m ∣' P? = filterᵐ (sp-∘ P? proj₁) m
 
-_∣^'_ : {P : B → Type} → Map A B → specProperty P → Map A B
+_∣^'_ : ⦃ _ : Cs A ⦄ → ⦃ _ : Cs B ⦄
+  → {P : B → Type} → Map A B → specProperty P → Map A B
 m ∣^' P? = filterᵐ (sp-∘ P? proj₂) m
 
-constMap : Set A → B → Map A B
+constMap : ⦃ _ : Cs A ⦄ → ⦃ _ : Cs B ⦄ → Set A → B → Map A B
 constMap X b = mapˢ (_, b) X , λ x x₁ →
   trans (proj₂ $ ×-≡,≡←≡ $ proj₁ $ proj₂ (∈⇔P x))
         (sym $ proj₂ $ ×-≡,≡←≡ $ proj₁ $ proj₂ (∈⇔P x₁))
 
-constMap-dom : dom (constMap X b ˢ) ≡ᵉ X
+constMap-dom : ⦃ _ : Cs A ⦄ → ⦃ _ : Cs B ⦄
+  → {X : Set A} {b : B} → dom (constMap X b ˢ) ≡ᵉ X
 constMap-dom .proj₁ a∈dom with from dom∈ a∈dom
 ... | b' , ab'∈map with from ∈-map ab'∈map
 ... | a' , ab'≡a'b , a'∈X = subst (_∈ _) (sym (proj₁ (×-≡,≡←≡ ab'≡a'b))) a'∈X
 constMap-dom .proj₂ a∈X = to dom∈ (_ , to ∈-map (_ , refl , a∈X))
 
-mapPartialLiftKey-just-uniq : ∀ {f : A → B → Maybe B'}
+mapPartialLiftKey-just-uniq : ⦃ _ : Cs A ⦄ → ⦃ _ : Cs B ⦄ → ⦃ _ : Cs B' ⦄
+
+  → {R : Rel A B} {a : A} {b b' : B'} → ∀ {f : A → B → Maybe B'}
   → left-unique R
   → just (a , b)  ∈ mapˢ (mapPartialLiftKey f) R
   → just (a , b') ∈ mapˢ (mapPartialLiftKey f) R
@@ -352,7 +375,9 @@ mapPartialLiftKey-just-uniq {f = f} prop a∈ a'∈ =
   in
     just-injective $ trans eq (trans (cong (f _) (prop ax∈r ax'∈r)) (sym eq'))
 
-mapPartial-uniq : ∀ {r : Rel A B} {f : A → B → Maybe B' }
+mapPartial-uniq : ⦃ _ : Cs A ⦄ → ⦃ _ : Cs B ⦄ → ⦃ _ : Cs B' ⦄
+
+  → ∀ {r : Rel A B} {f : A → B → Maybe B' }
   → left-unique r
   → left-unique (mapPartial (mapPartialLiftKey f) r)
 mapPartial-uniq {f = f} prop {a} {b} {b'} p q =
@@ -360,15 +385,18 @@ mapPartial-uniq {f = f} prop {a} {b} {b'} p q =
       q = ∈-map′ q
   in mapPartialLiftKey-just-uniq {f = f} prop (⊆-mapPartial p) (⊆-mapPartial q)
 
-mapMaybeWithKeyᵐ : (A → B → Maybe B') → Map A B → Map A B'
+mapMaybeWithKeyᵐ : ⦃ _ : Cs A ⦄ → ⦃ _ : Cs B ⦄ → ⦃ _ : Cs B' ⦄
+
+  → (A → B → Maybe B') → Map A B → Map A B'
 mapMaybeWithKeyᵐ f (rel , prop) = mapMaybeWithKey f rel , mapPartial-uniq {f = f} prop
 
-mapFromPartialFun : (A → Maybe B) → Set A → Map A B
+mapFromPartialFun : ⦃ _ : Cs A ⦄ → ⦃ _ : Cs B ⦄
+  → (A → Maybe B) → Set A → Map A B
 mapFromPartialFun f s = mapMaybeWithKeyᵐ (λ _ → f) (idMap s)
 
-module Restrictionᵐ (sp-∈ : spec-∈ A) where
-  private module R = Restriction sp-∈
-  open Unionᵐ sp-∈
+module Restrictionᵐ ⦃ cA : Cs A ⦄ ⦃ cB : Cs B ⦄ (sp-∈ : spec-∈ A) where
+  private module R = Restriction ⦃ cA ⦄ ⦃ cB ⦄ sp-∈
+  open Unionᵐ ⦃ cA ⦄ sp-∈
 
   _∣_ : Map A B → Set A → Map A B
   m ∣ X = ⊆-map (R._∣ X) R.res-⊆ m
@@ -387,10 +415,10 @@ module Restrictionᵐ (sp-∈ : spec-∈ A) where
   mapSingleValue : (B → B) → Map A B → A → Map A B
   mapSingleValue f m a = mapValueRestricted f m ❴ a ❵
 
-  curryᵐ : Map (A × B) C → A → Map B C
+  curryᵐ : ⦃ _ : Cs C ⦄ → Map (A × B) C → A → Map B C
   curryᵐ m a = R.curryʳ (m ˢ) a , λ h h' → proj₂ m (R.∈-curryʳ h) (R.∈-curryʳ h')
 
-  res-dom∈ : ∀ {b} → (a , b) ∈ (m ∣ X) ˢ ⇔ ((a , b) ∈ m ˢ × a ∈ X)
+  res-dom∈ : {a : A} {b : B} {m : Map A B} {X : Set A} → (a , b) ∈ (m ∣ X) ˢ ⇔ ((a , b) ∈ m ˢ × a ∈ X)
   res-dom∈ = R.∈-res
 
   res-cong : ∀ {m m' : Map A B} {X Y : Set A}
@@ -406,12 +434,12 @@ module Restrictionᵐ (sp-∈ : spec-∈ A) where
       ⊆ p with to (res-dom∈ {m = m}) p
       ... | (p , q) = from (res-dom∈ {m = m'}) (m≡m' .proj₁ p , (X≡Y .proj₁ q))
 
-  res-subset : R ⊆ m ˢ → (m ∣ dom R) ˢ ≡ᵉ R
+  res-subset : {R : Rel A B} {m : Map A B} → R ⊆ m ˢ → (m ∣ dom R) ˢ ≡ᵉ R
   res-subset {m = _ , uniq} R⊆m .proj₁ {a , b} ab∈ with from dom∈ (R.res-dom $ to dom∈ (b , ab∈))
   ... | b' , ab'∈ = subst (λ u → (a , u) ∈ _) (uniq (R⊆m ab'∈) $ R.res-⊆ ab∈) ab'∈
   res-subset {m = m} R⊆m .proj₂ ab∈ = from (res-dom∈ {m = m}) (R⊆m ab∈ , to dom∈ (_ , ab∈))
 
-  res-singleton : ∀ {k} → k ∈ dom (m ˢ) → ∃[ v ] m ∣ ❴ k ❵ ≡ᵐ ❴ k , v ❵ᵐ
+  res-singleton : {m : Map A B} → ∀ {k} → k ∈ dom (m ˢ) → ∃[ v ] m ∣ ❴ k ❵ ≡ᵐ ❴ k , v ❵ᵐ
   res-singleton {m = m@(_ , uniq)} k∈domm
     with (k , v) , (refl , h) ← ∈⇔P k∈domm
     = v
@@ -422,21 +450,21 @@ module Restrictionᵐ (sp-∈ : spec-∈ A) where
                         (sym $ from ∈-singleton a∈❴k,v❵)
                         (∈⇔P (to ∈-singleton refl , h))
 
-  res-singleton' : ∀ {k v} → (k , v) ∈ m ˢ → m ∣ ❴ k ❵ ≡ᵐ ❴ k , v ❵ᵐ
+  res-singleton' : {m : Map A B} → ∀ {k v} → (k , v) ∈ m ˢ → m ∣ ❴ k ❵ ≡ᵐ ❴ k , v ❵ᵐ
   res-singleton' {m = m} kv∈m
     with _ , h ← res-singleton {m = m} (∈⇔P (-, (refl , kv∈m)))
     = subst _ (sym $ proj₂ m kv∈m (R.res-⊆ $ proj₂ h $ to ∈-singleton refl)) h
 
-  res-singleton⁺ : {k : A}{v : B} → (k , v) ∈ m ˢ → (k , v) ∈ (m ∣ ❴ k ❵)ˢ
+  res-singleton⁺ : {m : Map A B} → {k : A}{v : B} → (k , v) ∈ m ˢ → (k , v) ∈ (m ∣ ❴ k ❵)ˢ
   res-singleton⁺ kv∈m = to ∈-filter ((to ∈-singleton refl) , kv∈m)
 
-  res-singleton-inhabited : ∀ {k a} → a ∈ (m ∣ ❴ k ❵) ˢ → k ∈ dom (m ˢ)
+  res-singleton-inhabited : {m : Map A B} → ∀ {k a} → a ∈ (m ∣ ❴ k ❵) ˢ → k ∈ dom (m ˢ)
   res-singleton-inhabited {m = m} {k} {a} a∈ =
     to dom∈ ( proj₂ a , subst (λ x → (x , proj₂ a) ∈ (m ˢ))
                                 (from ∈-singleton (R.res-dom (∈-dom a∈)))
                                 (R.res-⊆ a∈) )
 
-  res-singleton'' : ∀ {k a} → a ∈ (m ∣ ❴ k ❵)ˢ → ∃[ v ] a ≡ (k , v)
+  res-singleton'' : {m : Map A B} → ∀ {k a} → a ∈ (m ∣ ❴ k ❵)ˢ → ∃[ v ] a ≡ (k , v)
   res-singleton'' {m = m}{k}{a} a∈m =
     let (v , m|≡) = res-singleton {m = m} (res-singleton-inhabited{m = m} a∈m) in
     v , from ∈-singleton (proj₁ m|≡ a∈m)
@@ -449,11 +477,11 @@ module Restrictionᵐ (sp-∈ : spec-∈ A) where
   update x (just y) m = insert m x y
   update x nothing  m = m ∣ ❴ x ❵ ᶜ
 
-module Lookupᵐ (sp-∈ : spec-∈ A) where
+module Lookupᵐ ⦃ cA : Cs A ⦄ ⦃ cB : Cs B ⦄ (sp-∈ : spec-∈ A) where
   open import Relation.Nullary.Decidable
-  private module R = Restriction sp-∈
-  open Unionᵐ sp-∈
-  open Restriction sp-∈
+  private module R = Restriction ⦃ cA ⦄ ⦃ cB ⦄ sp-∈
+  open Unionᵐ ⦃ cA ⦄ sp-∈
+  open Restriction ⦃ cA ⦄ ⦃ cB ⦄ sp-∈
 
   module _ (m@(mˢ , uniq) : Map A B) (x : A) where
     lookupᵐ : {@(tactic initTac assumption') _ : x ∈ dom (m ˢ)} → B
@@ -473,11 +501,12 @@ module Lookupᵐ (sp-∈ : spec-∈ A) where
     ∈⇒lookup≡just P ⦃ ⁇ (yes q') ⦄ = cong just (∈-lookup q' P)
     ∈⇒lookup≡just P ⦃ ⁇ (no ¬q') ⦄ = ⊥-elim (¬q' (to dom∈ (_ , P)))
 
-  pullbackMap : (m : Map A B) → ⦃ ∀ {x} → (x ∈ dom (m ˢ)) ⁇ ⦄ → (A' → A) → Set A' → Map A' B
+  pullbackMap : ⦃ _ : Cs A' ⦄
+    → (m : Map A B) → ⦃ ∀ {x} → (x ∈ dom (m ˢ)) ⁇ ⦄ → (A' → A) → Set A' → Map A' B
   pullbackMap m f s = mapMaybeWithKeyᵐ (λ a _ → lookupᵐ? m (f a)) (idMap s)
 
-module Corestrictionᵐ (sp-∈ : spec-∈ B) where
-  private module R = Corestriction sp-∈
+module Corestrictionᵐ ⦃ cA : Cs A ⦄ ⦃ cB : Cs B ⦄ (sp-∈ : spec-∈ B) where
+  private module R = Corestriction ⦃ cA ⦄ ⦃ cB ⦄ sp-∈
 
   _∣^_ : Map A B → Set B → Map A B
   m ∣^ X = ⊆-map (R._∣^ X) R.cores-⊆ m

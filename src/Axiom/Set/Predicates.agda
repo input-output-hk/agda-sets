@@ -11,9 +11,11 @@ import Function.Properties.Equivalence as E
 
 Pred-Model : Theory
 Pred-Model = λ where
+  .sc            → ⊤-SetConstraint
   .Set           → λ A → A → Type
   ._∈_           → λ x X → X x
   .sp            → ⊤-SpecProperty
+  .c-Set         → mkCstr tt
   .specification {_} {P} → λ X _ → P P.∩ X , E.refl
   .unions        → λ X → (λ a → ∃[ Z ] X Z × Z a) , E.refl
   .replacement   → λ f X → (λ b → ∃[ a ] b ≡ f a × X a) , E.refl

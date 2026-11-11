@@ -4,7 +4,7 @@ open import Axiom.Set using (Theory)
 
 open import abstract-set-theory.Prelude hiding (ε)
 
-module Axiom.Set.Sum (th : Theory) where
+module Axiom.Set.Sum {ℓ_c} (th : Theory {zeroˡ} {ℓ_c}) where
 
 open Theory th
 open import Axiom.Set.Factor th
@@ -41,7 +41,6 @@ private macro
 
 private variable
   A B M : Type
-  X Y : Set A
   f : A → M
 
 module _ ⦃ M-commMonoid : CommutativeMonoid 0ℓ 0ℓ M ⦄ where
@@ -67,7 +66,7 @@ module _ ⦃ M-commMonoid : CommutativeMonoid 0ℓ 0ℓ M ⦄ where
     f y ∙ (f x ∙ indexedSumL f ys) ∎
   fold-cong↭ (trans h h₁) = ≈-trans (fold-cong↭ h) (fold-cong↭ h₁)
 
-  indexedSum : ⦃ _ : DecEq A ⦄ → (A → M) → FinSet A → M
+  indexedSum : ⦃ _ : Cs A ⦄ → ⦃ _ : DecEq A ⦄ → (A → M) → FinSet A → M
   indexedSum f = let open FactorUnique _≈_ (indexedSumL' f) fold-cong↭ in factor
 
   indexedSumL-++ : {l l' : List A}
@@ -85,7 +84,7 @@ module _ ⦃ M-commMonoid : CommutativeMonoid 0ℓ 0ℓ M ⦄ where
         f x ∙ indexedSumL f l ∙ m      ∎
 
 
-  module _ ⦃ _ : DecEq A ⦄ {f : A → M} where
+  module _ ⦃ _ : Cs A ⦄ ⦃ _ : DecEq A ⦄ {f : A → M} where
     open FactorUnique _≈_ (indexedSumL' f) fold-cong↭
 
     indexedSum-cong : indexedSum f Preserves (_≡ᵉ_ on proj₁) ⟶ _≈_
@@ -94,7 +93,7 @@ module _ ⦃ M-commMonoid : CommutativeMonoid 0ℓ 0ℓ M ⦄ where
     indexedSum-∅ : indexedSum f (∅ , ∅-finite) ≈ ε
     indexedSum-∅ = begin _ ∎
 
-    indexedSum-∪ : ⦃ Xᶠ : finite X ⦄ ⦃ Yᶠ : finite Y ⦄ → disjoint X Y
+    indexedSum-∪ : {X Y : Set A} → ⦃ Xᶠ : finite X ⦄ ⦃ Yᶠ : finite Y ⦄ → disjoint X Y
       → indexedSum f ((X ∪ Y) ᶠ) ≈ indexedSum f (X ᶠ) ∙ indexedSum f (Y ᶠ)
     indexedSum-∪ disj = factor-∪' {λ x y z → z ≈ x ∙ y} disj
         λ {l} disj' → ≈-trans (fold-cong↭ (dedup-++-↭ disj'))
@@ -110,7 +109,8 @@ module _ ⦃ M-commMonoid : CommutativeMonoid 0ℓ 0ℓ M ⦄ where
               indexedSum-singleton
       where module ≡ᵉ = IsEquivalence ≡ᵉ-isEquivalence
 
-module _ ⦃ _ : DecEq A ⦄ ⦃ _ : DecEq B ⦄ ⦃ _ : CommutativeMonoid 0ℓ 0ℓ M ⦄ where
+module _ ⦃ _ : Cs A ⦄ ⦃ _ : Cs B ⦄
+         ⦃ _ : DecEq A ⦄ ⦃ _ : DecEq B ⦄ ⦃ _ : CommutativeMonoid 0ℓ 0ℓ M ⦄ where
 
   indexedSumᵐ : (A × B → M) → FinMap A B → M
   indexedSumᵐ f (m , _ , h) = indexedSum f (m , h)
@@ -124,7 +124,8 @@ module _ ⦃ _ : DecEq A ⦄ ⦃ _ : DecEq B ⦄ ⦃ _ : CommutativeMonoid 0ℓ 
     → indexedSumᵐ f Preserves (_≡ᵉ_ on proj₁) ⟶ _≈_
   indexedSumᵐ-cong {x = x , _ , h} {y , _ , h'} = indexedSum-cong {x = x , h} {y , h'}
 
-module IndexedSumUnionᵐ ⦃ _ : DecEq A ⦄ ⦃ _ : DecEq B ⦄
+module IndexedSumUnionᵐ ⦃ _ : Cs A ⦄ ⦃ _ : Cs B ⦄
+  ⦃ _ : DecEq A ⦄ ⦃ _ : DecEq B ⦄
   (sp-∈ : spec-∈ A) (∈-A-dec : {X : Set A} → Decidable¹ (_∈ X)) where
 
   open Unionᵐ sp-∈

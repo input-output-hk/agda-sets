@@ -22,9 +22,11 @@ open import Relation.Nullary.Decidable
 
 List-Model : Theory
 List-Model = λ where
-  .Set           → List
+  .sc            → ⊤-SetConstraint
+  .Set           → λ _ → List _
   ._∈_           → _∈ˡ_
   .sp            → Dec-SpecProperty
+  .c-Set         → mkCstr tt
   .specification → λ X P? → filter P? X , mk⇔
     (λ where (Pa , a∈X) → ∈-filter⁺ P? a∈X Pa)
     (λ a∈f → swap (∈-filter⁻ P? a∈f))
