@@ -10,7 +10,7 @@ open import Level public
 open import Function public
 
 open import Data.Bool public
-  hiding (_≟_; _≤_; _≤?_; _<_; _<?_; if_then_else_)
+  hiding (_≟_; _≡?_; _≤_; _≤?_; _<_; _<?_; if_then_else_)
 open import Data.Empty public
 open import Data.List public
   hiding (align; alignWith; filter; fromMaybe; map; zip; zipWith)
@@ -29,7 +29,7 @@ open import Data.Sum public
 open import Data.Product public
   hiding (assocʳ; assocˡ; map; map₁; map₂; map₂′; swap; _<*>_)
 open import Data.Nat public
-  hiding (_≟_; _≤_; _≤?_; _<_; _<?_; _≤ᵇ_; _≡ᵇ_; _≥_; _>_; less-than-or-equal)
+  hiding (_≟_; _≡?_; _≤_; _≤?_; _<_; _<?_; _≤ᵇ_; _≡ᵇ_; _≥_; _>_; less-than-or-equal)
   renaming (_+_ to _+ℕ_)
 open import Data.Integer as ℤ public
   using (ℤ)
